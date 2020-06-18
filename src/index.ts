@@ -10,5 +10,5 @@ const graph_visualization = new GraphVisualization(SugiyamaLayout, RandomLayerin
 
 graph_visualization.computeGraphicalRepresentation(graph).then(() => {
   const canvas = document.querySelector('canvas');
-  graph_visualization.drawOnCanvas(canvas);
+  graph_visualization.drawOnCanvas(canvas!);
 });

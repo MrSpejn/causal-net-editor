@@ -1,0 +1,93 @@
+import _ from 'lodash';
+import VizNode from './VizNode';
+import VizEdge from './VizEdge';
+
+import Graph, {
+    OUTGOING,
+    INCOMMING,
+} from '../graphRepresentation/Graph';
+
+import DrawingContext from './DrawingContext';
+import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
+import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
+
+const WIDTH = 40
+const HEIGHT = 40
+const X = 0
+const Y = 1
+const SCALE = 3
+
+function constructViznode(node: StandarisedLayoutNode, edges: Array<StandarisedLayoutEdge>,
+                          width: number, height: number): VizNode {
+    return new VizNode(
+        node.id,
+        node.position,
+        edges.filter(edge => edge.start_id === node.id).map(edge => ({
+            'target': edge.end_id.toString(),
+            'points': edge.points,
+            'point': edge.points[0],
+        })),
+        edges.filter(edge => edge.end_id === node.id).map(edge => ({
+            'target': edge.start_id.toString(),
+            'points': edge.points,
+            'point': edge.points[edge.points.length - 1],
+        })),
+        width,
+        height,
+    )
+}
+
+class GraphVizualization {
+    bindingClass: Constructable<BindingLayering>;
+    graphLayout: GraphLayout;
+    vizNodes: Array<VizNode>;
+    vizEdges: Array<VizEdge>;
+    context: DrawingContext | null;
+
+    constructor(layoutClass: Constructable<GraphLayout>, bindingClass: Constructable<BindingLayering>) {
+        this.graphLayout = new layoutClass();
+        this.bindingClass = bindingClass;
+        this.vizNodes = [];
+        this.vizEdges = [];
+        this.context = null;
+    }
+
+    computeGraphicalRepresentation(graph: Graph): Promise<void> {
+        return (this.graphLayout).compute_positions(
+            graph.adj_matrix,
+            graph.nodes.map(n => n.id.toString()),
+            WIDTH,
+            HEIGHT,
+        ).then((output: StandarisedLayout) => {
+            this.vizNodes = output.nodes.map((node: StandarisedLayoutNode) => 
+                constructViznode(node, output.edges, WIDTH, HEIGHT));
+            this.vizEdges = output.edges.map((edge: StandarisedLayoutEdge) => 
+                new VizEdge(edge.points));
+
+            _.zip(this.vizNodes, graph.nodes).forEach(([vizNode, graphNode]) => {
+                vizNode!.compute_bindings_position(
+                    this.bindingClass,
+                    graphNode![INCOMMING],
+                    graphNode![OUTGOING],
+                );
+            });
+        });
+    }
+
+    drawOnCanvas(canvas: HTMLCanvasElement): void {
+        this.context = new DrawingContext(canvas, SCALE, X, Y);
+    
+        this.vizNodes.forEach(vizNode => {
+            vizNode.draw(this.context!);
+        });
+        
+        this.vizEdges.forEach((viz_edge) => {
+            this.context!.drawSegmentedArrow(viz_edge.points, {
+                lineWidth: 1,
+                strokeStyle: 'black',
+            });
+        });
+    }
+}
+
+export default GraphVizualization;

@@ -90,7 +90,19 @@ export const JSONGraph = {
                 [0, 1, 4],
                 [2],
             ]
-        }
+        },
+        // {
+        //     "id": 6,
+        //     "name": "a",
+        //     "additional_info": {},
+        //     "outgoing": [
+        //         [1, 2],
+              
+        //     ],
+        //     "incomming": [
+        //         [0]
+        //     ]
+        // },
     ]
   }
 

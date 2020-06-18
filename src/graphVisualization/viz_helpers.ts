@@ -1,8 +1,6 @@
-function calcAngle(x, y) {
-    return Math.atan2(y, x);
-}
+import { Point } from '../graphVisualization/types';
 
-function getInterpolationWithDistance(x1, y1, x2, y2, distance) {
+function getInterpolationWithDistance(x1: number, y1: number, x2: number, y2: number, distance: number): number | null {
     const A = (x2*x2) - (2*x1*x2) + (x1*x1) + (y1*y1) + (y2*y2) - (2*y1*y2)
     const B = 2*x1*x2 + 2*y1*y2 - (2*x1*x1) - (2*y1*y1);
     const C = y1*y1 + x1*x1 - distance*distance;
@@ -24,7 +22,7 @@ function getInterpolationWithDistance(x1, y1, x2, y2, distance) {
     return null;
 }
 
-function findPointSanityCheck(center, line, distance) {
+function findPointSanityCheck(center: Point, line: Array<Point>, distance: number): void {
     const first_p = [...line[0]];
     const last_p = [...line[line.length - 1]]
 
@@ -45,7 +43,7 @@ function findPointSanityCheck(center, line, distance) {
     }
 }
 
-export function findPointOnLine(center, line, distance) {
+export function findPointOnLine(center: Point, line: Array<Point>, distance: number): Point {
     findPointSanityCheck(center, line, distance);
 
     const center_coords = line.map(point => ([point[0] - center[0], point[1] - center[1]]));
@@ -58,7 +56,7 @@ export function findPointOnLine(center, line, distance) {
                 center_coords[i+1][1]*theta + center_coords[i][1]*(1 - theta) + center[1],
             ]
               
-            return point;
+            return point as Point;
         }
        
     }
