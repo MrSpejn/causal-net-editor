@@ -57,11 +57,11 @@ class VizNode {
 
     draw(context: DrawingContext) {
         context.drawCircle(this.position, (this.width / 2 - 5), {
-            'lineWidth': 5,
+            'lineWidth': 1.5,
             'stroke': true,
         });
         context.drawText(this.id, this.position, {
-            font: 'bold 48px serif',
+            font: 'bold 16px serif',
 
         });
 
@@ -93,7 +93,7 @@ class VizNode {
 
         if (s_angle !== e_angle) {
             context.drawArc(this.position, distance, s_angle, e_angle, {
-                lineWidth: 3,
+                lineWidth: 1,
                 stroke: true,
             });
         }

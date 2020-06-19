@@ -5,6 +5,10 @@ interface ContextOptions {
     [key: string]: any;
 };
  
+interface RegistrationData {
+    [key: string]: any;
+}
+
 const DEFAULT_ARROW_LENGTH = 5;
 const DEFAULT_ARROW_WIDTH = 4;
 
@@ -13,13 +17,20 @@ class DrawingContext {
     SCALE: number;
     X: number;
     Y: number;
+    shiftX: number;
+    shiftY: number;
 
-    constructor(canvas: HTMLCanvasElement, scale: number, x: number, y: number) {
+    constructor(canvas: HTMLCanvasElement, scale: number,
+                x: number, y: number,
+                shift_x: number, shift_y: number) {
         this.context = canvas.getContext('2d')!;
         this.SCALE = scale;
         this.X = x;
         this.Y = y;
+        this.shiftX = shift_x;
+        this.shiftY = shift_y;
     }
+
     _applyContextOptions(contextOptions: ContextOptions, afterClose: boolean): void {
         const toExecute = []
         for (let [key, value] of Object.entries(contextOptions)) {
@@ -33,8 +44,14 @@ class DrawingContext {
                     toExecute.push(key.slice(1));
                 }
             } else {
-                // @ts-ignore
-                this.context[key] = value;
+                if (typeof value === 'number') {
+                    // @ts-ignore
+                    this.context[key] = value * this.SCALE;
+                } else if (key === 'font') {
+                    const fields = value.split(' ');
+                    const fontSize = parseInt(fields[1].slice(0, -2)) * this.SCALE;
+                    this.context.font = `${fields[0]} ${fontSize}px ${fields[2]}`;
+                }
             }
         }
         for (let fn of toExecute) {
@@ -42,12 +59,14 @@ class DrawingContext {
             this.context[fn]();
         }
     }
+
     _coord(point: Point): Point {
         return [
-            point[this.X] * this.SCALE,
-            point[this.Y] * this.SCALE
+            (point[this.X] + this.shiftX) * this.SCALE,
+            (point[this.Y] + this.shiftY) * this.SCALE
         ];
     }
+
     drawSegmentedArrow(points: Array<Point>, contextOptions: ContextOptions): void {
         this.drawSegmentedLine(points, {...contextOptions, fill: false, cfill: false, stroke: true });
         const last = points[points.length - 1];
@@ -100,7 +119,7 @@ class DrawingContext {
         this._applyContextOptions(contextOptions, true);
     }
 
-    drawArc(center: Point, radius: number, angleStart: number, angleEnd: number, contextOptions: ContextOptions):void {
+    drawArc(center: Point, radius: number, angleStart: number, angleEnd: number, contextOptions: ContextOptions): void {
         this.context.beginPath();
         const coord = this._coord(center);
         this.context.arc(coord[0], coord[1], radius * this.SCALE, angleStart, angleEnd, false);
@@ -110,7 +129,7 @@ class DrawingContext {
         this._applyContextOptions(contextOptions, true);
     }
 
-    drawCircle(center: Point, radius: number, contextOptions: ContextOptions):void {
+    drawCircle(center: Point, radius: number, contextOptions: ContextOptions): void {
         this.context.beginPath();
         const coord = this._coord(center);
         this.context.arc(coord[0], coord[1], radius * this.SCALE, 0, 2 * Math.PI, false);
@@ -120,7 +139,7 @@ class DrawingContext {
         this._applyContextOptions(contextOptions, true);
     }
 
-    drawText(text: string, position: Point, contextOptions: ContextOptions):void {
+    drawText(text: string, position: Point, contextOptions: ContextOptions): void {
         this._applyContextOptions({
             ...contextOptions,
             stroke: false,
@@ -130,9 +149,6 @@ class DrawingContext {
         this.context.fillText(text, coord[0], coord[1]);
 
     }
-    // registerCircle(center, radius, registrationData) {
-
-    // }
 }
 
 export default DrawingContext;

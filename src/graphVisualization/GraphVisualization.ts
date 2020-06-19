@@ -10,12 +10,10 @@ import Graph, {
 import DrawingContext from './DrawingContext';
 import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
 import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
+import InteractivityController from '../canvasIntercativity/InteractivityController';
 
 const WIDTH = 40
 const HEIGHT = 40
-const X = 0
-const Y = 1
-const SCALE = 3
 
 function constructViznode(node: StandarisedLayoutNode, edges: Array<StandarisedLayoutEdge>,
                           width: number, height: number): VizNode {
@@ -43,13 +41,18 @@ class GraphVizualization {
     vizNodes: Array<VizNode>;
     vizEdges: Array<VizEdge>;
     context: DrawingContext | null;
+    controller: InteractivityController;
 
-    constructor(layoutClass: Constructable<GraphLayout>, bindingClass: Constructable<BindingLayering>) {
+    constructor(layoutClass: Constructable<GraphLayout>, 
+                bindingClass: Constructable<BindingLayering>, 
+                controller: InteractivityController
+                ) {
         this.graphLayout = new layoutClass();
         this.bindingClass = bindingClass;
         this.vizNodes = [];
         this.vizEdges = [];
         this.context = null;
+        this.controller = controller;
     }
 
     computeGraphicalRepresentation(graph: Graph): Promise<void> {
@@ -74,8 +77,10 @@ class GraphVizualization {
         });
     }
 
-    drawOnCanvas(canvas: HTMLCanvasElement): void {
-        this.context = new DrawingContext(canvas, SCALE, X, Y);
+    drawOnCanvas(canvas: HTMLCanvasElement, SCALE: number,
+                 X: number, Y: number,
+                 shiftX: number, shiftY: number): void {
+        this.context = new DrawingContext(canvas, SCALE, X, Y, shiftX, shiftY);
     
         this.vizNodes.forEach(vizNode => {
             vizNode.draw(this.context!);
@@ -83,7 +88,7 @@ class GraphVizualization {
         
         this.vizEdges.forEach((viz_edge) => {
             this.context!.drawSegmentedArrow(viz_edge.points, {
-                lineWidth: 1,
+                lineWidth: .33,
                 strokeStyle: 'black',
             });
         });
