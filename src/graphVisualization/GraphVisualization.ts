@@ -55,7 +55,7 @@ class GraphVizualization {
         this.controller = controller;
     }
 
-    computeGraphicalRepresentation(graph: Graph): Promise<void> {
+    computeGraphicalRepresentation(graph: Graph): Promise<StandarisedLayout> {
         return (this.graphLayout).compute_positions(
             graph.adj_matrix,
             graph.nodes.map(n => n.id.toString()),
@@ -74,6 +74,7 @@ class GraphVizualization {
                     graphNode![OUTGOING],
                 );
             });
+            return output;
         });
     }
 

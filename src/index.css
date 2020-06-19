@@ -27,10 +27,16 @@ code {
 .app__menu {
   width: 100%;
   height: 80px;
-  box-shadow: 0 4px 5px -1px #ddd;
+  box-shadow: 0 4px 4px 0 #ccc;
+}
+
+.app__canvas-container {
+  width: 100%;
+  height: calc(100% - 80px);
+  margin: 0 auto;
+  overflow: scroll;
 }
 
 .app__canvas {
-  width: 100%;
-  height: calc(100% - 80px);
+  margin: 0 auto;
 }

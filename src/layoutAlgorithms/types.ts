@@ -22,3 +22,10 @@ export type StandarisedLayout = {
     nodes: Array<StandarisedLayoutNode>;
     edges: Array<StandarisedLayoutEdge>;
 }
+
+export type BoundingBox = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}

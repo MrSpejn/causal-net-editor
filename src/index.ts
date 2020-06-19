@@ -4,6 +4,7 @@ import JSONGraph from './graph2';
 import InteractivityController from './canvasIntercativity/InteractivityController';
 
 import './index.css';
+import 'dragscroll';
 
 const graph = Graph.fromJSON(JSON.stringify(JSONGraph));
 const canvas = document.querySelector('canvas');

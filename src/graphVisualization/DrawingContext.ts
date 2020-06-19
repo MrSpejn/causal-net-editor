@@ -62,8 +62,8 @@ class DrawingContext {
 
     _coord(point: Point): Point {
         return [
-            (point[this.X] + this.shiftX) * this.SCALE,
-            (point[this.Y] + this.shiftY) * this.SCALE
+            (point[this.X]) * this.SCALE  + this.shiftX,
+            (point[this.Y]) * this.SCALE  + this.shiftY,
         ];
     }
 
