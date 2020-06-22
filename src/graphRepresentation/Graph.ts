@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Node, AdjacencyMatrix } from './types';
+import { Connection } from '../graphVisualization/types';
 
 export const OUTGOING = 'outgoing';
 export const INCOMMING = 'incomming';
@@ -24,6 +25,42 @@ class Graph {
 
     static fromJSON(json_string: string): Graph {
         return new Graph(JSON.parse(json_string).nodes)
+    }
+
+    removeNode(nodeId: number): Graph {
+        const newNodes = this.nodes.filter(node => node.id !== nodeId);
+        const withFilteredConn = newNodes.map(node => ({
+            ...node,
+            incomming: node.incomming.filter(
+                conn => conn.length !== 1 || conn[0] !== nodeId
+            ).map(
+                conn => conn.filter(target => target !== nodeId)
+            ),
+            outgoing: node.outgoing.filter(
+                conn => conn.length !== 1 || conn[0] !== nodeId
+            ).map(
+                conn => conn.filter(target => target !== nodeId
+            )),
+        }));
+
+        return new Graph(withFilteredConn);
+    }
+
+    editBinding(nodeId: number, toRemove: number, connection: Connection): Graph {
+        const fieldName = connection.in ? 'incomming' : 'outgoing';
+        const withFilteredConn = this.nodes.map(node => node.id === nodeId ? ({
+            ...node,
+            [fieldName]: _.uniqWith(
+                node[fieldName].map(conn => (
+                    _.isEqual(conn, connection.nodes) ?
+                    conn.filter(node => node !== toRemove) :
+                    conn
+                )),
+                _.isEqual,
+            ).filter(conn => conn.length),
+        }) : node);
+
+        return new Graph(withFilteredConn);
     }
 }
 

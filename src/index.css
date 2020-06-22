@@ -3,7 +3,7 @@
   box-sizing: border-box;
 }
 
-html {
+html, .app, #root {
   height: 100%;
   margin: 0;
 }
@@ -39,4 +39,33 @@ code {
 
 .app__canvas {
   margin: 0 auto;
+}
+
+.menu {
+  display: flex;
+  padding: 0 10%;
+  justify-content: space-between;
+  line-height: 80px;
+}
+.menu__left-section > button {
+  margin-right: 12px;
+}
+.menu__center-section > button {
+  margin-right: 6px;
+  margin-left: 6px;
+
+}
+.menu__right-section > button {
+  margin-left: 12px;
+}
+.menu__left-section, .menu__center-section, .menu__right-section {
+  width: 33.3%;
+  display: flex;
+  align-items: center;
+}
+.menu__center-section {
+  justify-content: center;
+}
+.menu__right-section {
+  justify-content: flex-end;
 }

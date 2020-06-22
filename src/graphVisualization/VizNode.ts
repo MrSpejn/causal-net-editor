@@ -6,6 +6,7 @@ import {
     Anchor,
     Point,
     RawConnection,
+    Connection,
 } from '../graphVisualization/types';
 
 import {
@@ -13,6 +14,7 @@ import {
     Binding,
     Constructable,
 } from '../bindingLayeringAlgorithms/types';
+import ElementRegistry, { ElementType } from '../canvasIntercativity/ElementRegistry';
 
 class VizNode {
     id: string;
@@ -21,6 +23,7 @@ class VizNode {
     height: number;
     anchors: Array<Anchor>;
     bindings: Array<Binding>;
+    connections?: Array<Connection>;
 
     constructor(id: string, position:Point, outgoing_anchors: Array<Anchor>,
                 incoming_anchors: Array<Anchor>, width: number, height: number) {
@@ -53,22 +56,26 @@ class VizNode {
         const binder = new binding_class();
 
         this.bindings = binder.compute_bindings(this.anchors, connections);
+        this.connections = connections;
     }
 
-    draw(context: DrawingContext) {
+    draw(context: DrawingContext, elementRegistry: ElementRegistry) {
         context.drawCircle(this.position, (this.width / 2 - 5), {
             'lineWidth': 1.5,
             'stroke': true,
         });
+        elementRegistry.registerElement(this.position, this.width / 2 - 5, {
+            type: ElementType.NODE,
+            node: this,
+        });
         context.drawText(this.id, this.position, {
             font: 'bold 16px serif',
-
         });
 
-        this.bindings.forEach(binding => this.drawBinding(binding, context));
+        this.bindings.forEach((binding, idx) => this.drawBinding(binding, this.connections![idx], context, elementRegistry));
     }
 
-    drawBinding(binding: Binding, context: DrawingContext) {
+    drawBinding(binding: Binding, conn: Connection, context: DrawingContext, elementRegistry: ElementRegistry) {
         const distance = 28 + 4 * binding.layer_n;
 
         const points = binding.sequence.map(anchor_idx => {
@@ -77,7 +84,13 @@ class VizNode {
             context.drawCircle(point, 2, {
                 fillStyle:  anchor_idx === 0 ? 'green' : 'black',
                 cfill: true,
-            })
+            });
+            elementRegistry.registerElement(point, 2, {
+                type: ElementType.ANCHOR,
+                anchor: this.anchors[anchor_idx],
+                connection: conn, 
+                node: this,
+            });
             return point;
         });
 

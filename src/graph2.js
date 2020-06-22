@@ -5,7 +5,7 @@ export const JSONGraph = {
             "name": "Start",
             "additional_info": {},
             "outgoing": [
-                [1, 2],
+                [1, 2, 6],
                 [3, 4],
                 [4, 5],
             ],
@@ -23,8 +23,8 @@ export const JSONGraph = {
             ],
             "incomming": [
                 [0, 2],
-                [0, 4, 5],
-                [3, 5],
+                [0, 4],
+                [3, 0, 6],
             ]
         },
         {
@@ -39,7 +39,7 @@ export const JSONGraph = {
             ],
             "incomming": [
                 [0],
-                [1],
+                [1, 6],
                 [3],
                 [4],
             ]
@@ -91,18 +91,18 @@ export const JSONGraph = {
                 [2],
             ]
         },
-        // {
-        //     "id": 6,
-        //     "name": "a",
-        //     "additional_info": {},
-        //     "outgoing": [
-        //         [1, 2],
+        {
+            "id": 6,
+            "name": "a",
+            "additional_info": {},
+            "outgoing": [
+                [1, 2],
               
-        //     ],
-        //     "incomming": [
-        //         [0]
-        //     ]
-        // },
+            ],
+            "incomming": [
+                [0]
+            ]
+        },
     ]
   }
 

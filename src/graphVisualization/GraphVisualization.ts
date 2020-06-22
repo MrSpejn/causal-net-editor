@@ -10,7 +10,7 @@ import Graph, {
 import DrawingContext from './DrawingContext';
 import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
 import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
-import InteractivityController from '../canvasIntercativity/InteractivityController';
+import ElementRegistry from '../canvasIntercativity/ElementRegistry';
 
 const WIDTH = 40
 const HEIGHT = 40
@@ -41,18 +41,18 @@ class GraphVizualization {
     vizNodes: Array<VizNode>;
     vizEdges: Array<VizEdge>;
     context: DrawingContext | null;
-    controller: InteractivityController;
+    elementRegistry: ElementRegistry;
 
     constructor(layoutClass: Constructable<GraphLayout>, 
                 bindingClass: Constructable<BindingLayering>, 
-                controller: InteractivityController
+                elementRegistry: ElementRegistry,
                 ) {
         this.graphLayout = new layoutClass();
         this.bindingClass = bindingClass;
         this.vizNodes = [];
         this.vizEdges = [];
         this.context = null;
-        this.controller = controller;
+        this.elementRegistry = elementRegistry;
     }
 
     computeGraphicalRepresentation(graph: Graph): Promise<StandarisedLayout> {
@@ -84,7 +84,7 @@ class GraphVizualization {
         this.context = new DrawingContext(canvas, SCALE, X, Y, shiftX, shiftY);
     
         this.vizNodes.forEach(vizNode => {
-            vizNode.draw(this.context!);
+            vizNode.draw(this.context!, this.elementRegistry!);
         });
         
         this.vizEdges.forEach((viz_edge) => {
