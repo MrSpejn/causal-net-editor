@@ -46,6 +46,7 @@ code {
   padding: 0 10%;
   justify-content: space-between;
   line-height: 80px;
+  height: 80px;
 }
 .menu__left-section > button {
   margin-right: 12px;
@@ -68,4 +69,17 @@ code {
 }
 .menu__right-section {
   justify-content: flex-end;
+}
+
+.MuiButton-endIcon {
+  margin-left: 0 !important;
+}
+
+.MuiButton-startIcon {
+  margin-right: 0 !important;
+}
+
+.menu__left-section .MuiButton-label {
+  height: 20px;
+  font-size: 12px;
 }

@@ -9,8 +9,8 @@ interface RegistrationData {
     [key: string]: any;
 }
 
-const DEFAULT_ARROW_LENGTH = 5;
-const DEFAULT_ARROW_WIDTH = 4;
+const DEFAULT_ARROW_LENGTH = 4;
+const DEFAULT_ARROW_WIDTH = 5;
 
 class DrawingContext {
     context: CanvasRenderingContext2D;
@@ -93,9 +93,9 @@ class DrawingContext {
         ortogonal.y = ortogonal.y * arr_width / 2;
 
         const points = [
-            origin_v.clone().add(diff_vect).toArray(),
-            origin_v.clone().add(ortogonal).toArray(),
-            origin_v.clone().subtract(ortogonal).toArray(),
+            origin_v.clone().toArray(),
+            origin_v.clone().subtract(diff_vect).add(ortogonal).toArray(),
+            origin_v.clone().subtract(diff_vect).subtract(ortogonal).toArray(),
         ];
         
         points.forEach((point) => {
@@ -145,7 +145,8 @@ class DrawingContext {
             stroke: false,
             fill: false,
         }, false);
-        const coord = this._coord(position);
+
+        const coord = this._coord([position[0] - 4, position[1] + 5]);
         this.context.fillText(text, coord[0], coord[1]);
 
     }

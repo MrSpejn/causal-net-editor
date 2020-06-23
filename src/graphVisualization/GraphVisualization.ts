@@ -12,8 +12,8 @@ import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedL
 import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
 import ElementRegistry from '../canvasIntercativity/ElementRegistry';
 
-const WIDTH = 40
-const HEIGHT = 40
+const WIDTH = 30
+const HEIGHT = 30
 
 function constructViznode(node: StandarisedLayoutNode, edges: Array<StandarisedLayoutEdge>,
                           width: number, height: number): VizNode {

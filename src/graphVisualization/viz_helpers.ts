@@ -24,22 +24,23 @@ function getInterpolationWithDistance(x1: number, y1: number, x2: number, y2: nu
 
 function findPointSanityCheck(center: Point, line: Array<Point>, distance: number): void {
     const first_p = [...line[0]];
-    const last_p = [...line[line.length - 1]]
+    const last_p = [...line[line.length - 1]];
 
-    first_p[0] -= center[0]
-    first_p[1] -= center[1]
-    last_p[0] -= center[0]
-    last_p[1] -= center[1]
+    first_p[0] -= center[0];
+    first_p[1] -= center[1];
+    last_p[0] -= center[0];
+    last_p[1] -= center[1];
 
-    const dist_first_square = first_p[0] * first_p[0] + first_p[1] * first_p[1]
-    const dist_last_square = last_p[0] * last_p[0] + last_p[1] * last_p[1]
+    const dist_first_square = first_p[0] * first_p[0] + first_p[1] * first_p[1];
+    const dist_last_square = last_p[0] * last_p[0] + last_p[1] * last_p[1];
 
     if (dist_first_square < distance*distance && dist_last_square < distance*distance) {
-        throw new Error('No point will not be found');
+        throw new Error('No point will not be found (Point to far)');
     }
 
     if (dist_first_square > distance*distance && dist_last_square > distance*distance) {
-        throw new Error('No point will not be found');
+        console.log(center, line, distance);
+        throw new Error('No point will not be found  (Point to close)');
     }
 }
 
@@ -54,7 +55,7 @@ export function findPointOnLine(center: Point, line: Array<Point>, distance: num
             const point = [
                 center_coords[i+1][0]*theta + center_coords[i][0]*(1 - theta) + center[0],
                 center_coords[i+1][1]*theta + center_coords[i][1]*(1 - theta) + center[1],
-            ]
+            ];
               
             return point as Point;
         }

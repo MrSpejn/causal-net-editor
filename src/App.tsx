@@ -1,7 +1,7 @@
 import React from 'react';
 import Graph from './graphRepresentation/Graph';
 
-import JSONGraph from './graph2';
+import JSONGraph from './graph3';
 import InteractivityController from './canvasIntercativity/InteractivityController';
 import ControlMenu from './components/ControlMenu';
 
@@ -28,10 +28,6 @@ class App extends React.Component<Props, State> {
         const controller = new InteractivityController(canvas);
 
         controller.init(graph);
-        controller.onNodeClick(data => {
-            const newGraph = controller.graph!.removeNode(parseInt(data.node.id));
-            controller.init(newGraph);
-        });
         this.setState({
             controller,
         });

@@ -60,23 +60,24 @@ class VizNode {
     }
 
     draw(context: DrawingContext, elementRegistry: ElementRegistry) {
-        context.drawCircle(this.position, (this.width / 2 - 5), {
+        context.drawCircle(this.position, (this.width / 2), {
             'lineWidth': 1.5,
             'stroke': true,
         });
-        elementRegistry.registerElement(this.position, this.width / 2 - 5, {
+        elementRegistry.registerElement(this.position, this.width / 2, {
             type: ElementType.NODE,
             node: this,
         });
         context.drawText(this.id, this.position, {
             font: 'bold 16px serif',
+            textAlign: "center",
         });
 
         this.bindings.forEach((binding, idx) => this.drawBinding(binding, this.connections![idx], context, elementRegistry));
     }
 
     drawBinding(binding: Binding, conn: Connection, context: DrawingContext, elementRegistry: ElementRegistry) {
-        const distance = 28 + 4 * binding.layer_n;
+        const distance = 19 + 4*(conn.in as unknown as number) + 4 * binding.layer_n;
 
         const points = binding.sequence.map(anchor_idx => {
             const point = findPointOnLine(this.position, this.anchors[anchor_idx].points, distance)

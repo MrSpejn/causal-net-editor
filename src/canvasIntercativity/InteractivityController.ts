@@ -62,6 +62,11 @@ class InteractivityController extends EventEmitter {
                 this.canvas!.style.cursor = 'default';
             }
         });
+
+        canvas!.height = canvas!.parentElement!.clientHeight * 2;
+        canvas!.width = canvas!.parentElement!.clientWidth * 2;
+        canvas.parentElement!.scrollTop = canvas!.parentElement!.clientHeight / 2;
+        canvas.parentElement!.scrollLeft = canvas!.parentElement!.clientWidth / 2;
     }
 
     init(graph: Graph): void {
@@ -73,7 +78,6 @@ class InteractivityController extends EventEmitter {
             const minHeight = this.canvas!.parentElement!.clientHeight;
             
             this.scale = Math.min(minWidth / boundingBox.width, minHeight / boundingBox.height);
-            console.log(this.scale);
             this.renderGraphOnScreen(graph).then(() => {
                 this.graph = graph;
                 this.emit(this.onInit);
@@ -85,8 +89,8 @@ class InteractivityController extends EventEmitter {
     renderGraphOnScreen(graph: Graph): Promise<StandarisedLayout> {
         return this.visualization!.computeGraphicalRepresentation(graph).then(layout => {
             const boundingBox = compute_bounding_box(layout, this.scale);
-            const minWidth = this.canvas!.parentElement!.clientWidth;
-            const minHeight = this.canvas!.parentElement!.clientHeight;
+            const minWidth = this.canvas!.parentElement!.clientWidth * 2;
+            const minHeight = this.canvas!.parentElement!.clientHeight * 2;
             this.canvas!.width = Math.max(boundingBox.width, minWidth);
             this.canvas!.height = Math.max(boundingBox.height, minHeight);
 

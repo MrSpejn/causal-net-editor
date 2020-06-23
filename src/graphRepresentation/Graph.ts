@@ -31,16 +31,16 @@ class Graph {
         const newNodes = this.nodes.filter(node => node.id !== nodeId);
         const withFilteredConn = newNodes.map(node => ({
             ...node,
-            incomming: node.incomming.filter(
+            incomming: _.uniqWith(node.incomming.filter(
                 conn => conn.length !== 1 || conn[0] !== nodeId
             ).map(
                 conn => conn.filter(target => target !== nodeId)
-            ),
-            outgoing: node.outgoing.filter(
+            ), _.isEqual),
+            outgoing: _.uniqWith(node.outgoing.filter(
                 conn => conn.length !== 1 || conn[0] !== nodeId
             ).map(
                 conn => conn.filter(target => target !== nodeId
-            )),
+            )), _.isEqual),
         }));
 
         return new Graph(withFilteredConn);

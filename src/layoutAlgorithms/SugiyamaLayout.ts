@@ -15,6 +15,10 @@ class SugiyamaLayout implements GraphLayout {
             id: "root",
             layoutOptions: {
                 'elk.algorithm': 'layered',
+                'elk.spacing.nodeNode': '40',
+                'elk.layered.spacing.nodeNodeBetweenLayers': '50',
+                'elk.layered.spacing.edgeNodeBetweenLayers': '0',
+                'elk.spacing.edgeNode': '0',
             },
             children: node_ids.map(id => ({
                 id: `${id}`,
