@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { Button } from '@material-ui/core';
 import ArrowRight from '@material-ui/icons/SubdirectoryArrowRight';
 import SyncDisabled from '@material-ui/icons/SyncDisabled';
@@ -8,7 +9,7 @@ import InteractivityController from '../canvasIntercativity/InteractivityControl
 import { NodeData, AnchorData } from '../canvasIntercativity/ElementRegistry';
 
 import ActionInfo from './ActionInfo';
-import { ConnectionInProgress } from './types';
+import { ConnectionInProgress } from '../graphRepresentation/types';
 
 interface Props {
     controller: InteractivityController | null,
@@ -37,17 +38,31 @@ class ControlMenu extends React.Component<Props, State> {
         this.state = initialState;
     }
 
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyBoard);
+    }
+
     componentDidUpdate(prevProps: Props, prevState: State) {
         if (this.props.controller && this.props.controller !== prevProps.controller){
             this.props.controller.onAnchorClick(this.handleAnchorClick);
             this.props.controller.onNodeClick(this.handleNodeClick);
         }
     }
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyBoard);
+    }
 
-    exitEditMode() {
-        this.setState({
-            ...initialState,
-        });
+    handleKeyBoard = (event: KeyboardEvent) => {
+        if (event.keyCode === 27) {
+            this.setState({
+                ...initialState,
+            });
+            event.preventDefault();
+
+        } else if (event.keyCode === 13) {
+            this.addConnectionAndReset();
+            event.preventDefault();
+        }
     }
 
     startAddingConnectionIn = () => {
@@ -88,23 +103,35 @@ class ControlMenu extends React.Component<Props, State> {
         });
     }
 
+    addConnectionAndReset = () => {
+        if (this.state.connectionInProgress && this.state.connectionInProgress.origin && this.state.connectionInProgress.destination.length) {
+            const newGraph = this.props.controller!.graph!.addConnection(this.state.connectionInProgress);
+            this.props.controller!.init(newGraph);
+
+            this.setState({ 
+                ...initialState,
+            });
+        }
+    }
+
     handleNodeClick = (data: NodeData) => {
         if (this.state.removingNodes) {
             const newGraph = this.props.controller!.graph!.removeNode(parseInt(data.node.id));
             this.props.controller!.init(newGraph);
         } 
         if (this.state.addingConnectionIn || this.state.addingConnectionOut) {
-            if (this.state.connectionInProgress?.origin != null) {
+            if (this.state.connectionInProgress!.origin != null) {
                 this.setState({
-                    connectionInProgress: {
+                    connectionInProgress: ({
                         ...this.state.connectionInProgress,
-                        destination: [
-                            ...this.state.connectionInProgress.destination,
+                        destination: _.uniq([
+                            ...this.state.connectionInProgress!.destination,
                             parseInt(data.node.id),
-                        ]
-                    }
+                        ]).filter(node => node !== this.state.connectionInProgress!.origin),
+                    }) as ConnectionInProgress
                 });
             } else {
+                console.log('HERE HERE')
                 this.setState({
                     connectionInProgress: {
                         ...this.state.connectionInProgress!,

@@ -6,3 +6,8 @@ export type Node = {
     outgoing: Array<Array<number>>;
     incomming: Array<Array<number>>;
 }
+export type ConnectionInProgress = {
+    origin: number | null,
+    destination: Array<number>,
+    in: boolean,
+}

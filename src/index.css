@@ -28,6 +28,7 @@ code {
   width: 100%;
   height: 80px;
   box-shadow: 0 4px 4px 0 #ccc;
+  position: relative;
 }
 
 .app__canvas-container {
@@ -82,4 +83,22 @@ code {
 .menu__left-section .MuiButton-label {
   height: 20px;
   font-size: 12px;
+}
+
+.action-info {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50px;
+  padding: 0 20px;
+}
+
+.action-info__action-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.action-info__action-target {
+  font-size: 14px;
+  margin: 5px 0;
 }

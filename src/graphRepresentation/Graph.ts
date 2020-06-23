@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Node, AdjacencyMatrix } from './types';
+import { Node, AdjacencyMatrix, ConnectionInProgress } from './types';
 import { Connection } from '../graphVisualization/types';
 
 export const OUTGOING = 'outgoing';
@@ -60,6 +60,21 @@ class Graph {
             ).filter(conn => conn.length),
         }) : node);
 
+        return new Graph(withFilteredConn);
+    }
+
+    addConnection(connection: ConnectionInProgress): Graph {
+        const fieldName = connection.in ? 'incomming' : 'outgoing';
+        const withFilteredConn = this.nodes.map(node => node.id === connection.origin ? ({
+            ...node,
+            [fieldName]: _.uniqWith([
+                    ...node[fieldName],
+                    connection.destination
+                ].map(conn => conn.sort() || conn),
+                _.isEqual,
+            ).filter(conn => conn.length),
+        }) : node);
+        
         return new Graph(withFilteredConn);
     }
 }
