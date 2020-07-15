@@ -84,11 +84,12 @@ class DrawingContext {
         const origin_v = new Victor(...origin);
         
         const diff_vect = new Victor(...directionVector).normalize();
+        const ortogonal = diff_vect.clone().rotateDeg(90)
+
         const arr_length = (contextOptions.arr_length || DEFAULT_ARROW_LENGTH);
         const arr_width =  (contextOptions.arr_width || DEFAULT_ARROW_WIDTH);
         diff_vect.x = diff_vect.x * arr_length;
         diff_vect.y = diff_vect.y * arr_length;
-        const ortogonal = diff_vect.clone().rotateBy(Math.PI / 2).normalize();
         ortogonal.x = ortogonal.x * arr_width / 2;
         ortogonal.y = ortogonal.y * arr_width / 2;
 
@@ -98,10 +99,8 @@ class DrawingContext {
             origin_v.clone().subtract(diff_vect).subtract(ortogonal).toArray(),
         ];
         
-        points.forEach((point) => {
-            const coord = this._coord(point as Point);
-            this.context.lineTo(coord[0], coord[1]);
-        });
+        const coords = points.map(point => this._coord(point as Point));
+        coords.forEach((coord) => this.context.lineTo(coord[0], coord[1]));
         this._applyContextOptions(contextOptions, false);
         this.context.closePath();
 
@@ -139,14 +138,23 @@ class DrawingContext {
         this._applyContextOptions(contextOptions, true);
     }
 
-    drawText(text: string, position: Point, contextOptions: ContextOptions): void {
-        this._applyContextOptions({
-            ...contextOptions,
-            stroke: false,
-            fill: false,
-        }, false);
+    drawText(text: string, position: Point, maxWidth: number): void {
+        
+        this.context.textAlign = "center";
+        this.context.textBaseline = "middle";
 
-        const coord = this._coord([position[0] - 4, position[1] + 5]);
+        const initialFont = 15;
+        const targetWidth = maxWidth * .9 * this.SCALE;
+
+        this.context.font = `${initialFont}px Arial`;
+
+        const measurements = this.context.measureText(text);
+        const height = measurements.actualBoundingBoxAscent + measurements.actualBoundingBoxDescent
+        const scale = Math.min(targetWidth / measurements.width, targetWidth / height)
+
+        this.context.font = `${Math.floor(initialFont * scale)}px Arial`;
+
+        const coord = this._coord([position[0], position[1]]);
         this.context.fillText(text, coord[0], coord[1]);
 
     }

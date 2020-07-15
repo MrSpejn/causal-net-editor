@@ -15,9 +15,11 @@ import {
     Constructable,
 } from '../bindingLayeringAlgorithms/types';
 import ElementRegistry, { ElementType } from '../canvasIntercativity/ElementRegistry';
+import { Node } from '../graphRepresentation/types';
 
 class VizNode {
     id: string;
+    node: Node;
     position: Point;
     width: number;
     height: number;
@@ -25,12 +27,13 @@ class VizNode {
     bindings: Array<Binding>;
     connections?: Array<Connection>;
 
-    constructor(id: string, position:Point, outgoing_anchors: Array<Anchor>,
+    constructor(id: string, node: Node, position:Point, outgoing_anchors: Array<Anchor>,
                 incoming_anchors: Array<Anchor>, width: number, height: number) {
         this.id = id;
         this.position = position;
         this.width = width;
         this.height = height;
+        this.node = node;
         this.bindings = [];
 
         let anchors = [
@@ -46,7 +49,7 @@ class VizNode {
         this.anchors = _.sortBy(anchors, (o) => o.angle)
     }
 
-    compute_bindings_position(binding_class: Constructable<BindingLayering>,
+    computeBindingsPosition(binding_class: Constructable<BindingLayering>,
                               incomming_connections: Array<RawConnection>,
                               outgoing_connections: Array<RawConnection>) {
         const connections = [
@@ -55,32 +58,29 @@ class VizNode {
         ]
         const binder = new binding_class();
 
-        this.bindings = binder.compute_bindings(this.anchors, connections);
+        this.bindings = binder.computeBindings(this.anchors, connections);
         this.connections = connections;
     }
 
     draw(context: DrawingContext, elementRegistry: ElementRegistry) {
         context.drawCircle(this.position, (this.width / 2), {
-            'lineWidth': 1.5,
+            'lineWidth': .75,
             'stroke': true,
         });
         elementRegistry.registerElement(this.position, this.width / 2, {
             type: ElementType.NODE,
             node: this,
         });
-        context.drawText(this.id, this.position, {
-            font: 'bold 16px serif',
-            textAlign: "center",
-        });
+        context.drawText(this.node.name, this.position, this.width);
 
         this.bindings.forEach((binding, idx) => this.drawBinding(binding, this.connections![idx], context, elementRegistry));
     }
 
     drawBinding(binding: Binding, conn: Connection, context: DrawingContext, elementRegistry: ElementRegistry) {
-        const distance = 19 + 4*(conn.in as unknown as number) + 4 * binding.layer_n;
+        const distance = 19 + 4 * binding.layer_n;
 
         const points = binding.sequence.map(anchor_idx => {
-            const point = findPointOnLine(this.position, this.anchors[anchor_idx].points, distance)
+            const point = findPointOnLine(this.position, this.anchors[anchor_idx].points, distance, conn.in)
             
             context.drawCircle(point, 2, {
                 fillStyle:  anchor_idx === 0 ? 'green' : 'black',

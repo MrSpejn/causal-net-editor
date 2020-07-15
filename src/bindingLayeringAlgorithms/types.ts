@@ -11,7 +11,7 @@ export type Binding = {
 };
 
 export interface BindingLayering {
-    compute_bindings(anchors: Array<Anchor>, connections: Array<Connection>): Array<Binding>;
+    computeBindings(anchors: Array<Anchor>, connections: Array<Connection>): Array<Binding>;
 }
 
 export interface Constructable<T> {

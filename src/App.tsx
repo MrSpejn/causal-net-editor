@@ -1,7 +1,7 @@
 import React from 'react';
 import Graph from './graphRepresentation/Graph';
 
-import JSONGraph from './graph3';
+import JSONGraph from './graphSepsis';
 import InteractivityController from './canvasIntercativity/InteractivityController';
 import ControlMenu from './components/ControlMenu';
 

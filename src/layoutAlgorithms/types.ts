@@ -9,7 +9,7 @@ export interface GraphLayout {
 
 export type StandarisedLayoutEdge = {
     start_id: string,
-    end_id: String,
+    end_id: string,
     points: Array<Point>,
 }
 

@@ -6,6 +6,7 @@ import Graph, {
     OUTGOING,
     INCOMMING,
 } from '../graphRepresentation/Graph';
+import { Node } from '../graphRepresentation/types';
 
 import DrawingContext from './DrawingContext';
 import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
@@ -15,17 +16,18 @@ import ElementRegistry from '../canvasIntercativity/ElementRegistry';
 const WIDTH = 30
 const HEIGHT = 30
 
-function constructViznode(node: StandarisedLayoutNode, edges: Array<StandarisedLayoutEdge>,
+function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, edges: Array<StandarisedLayoutEdge>,
                           width: number, height: number): VizNode {
     return new VizNode(
-        node.id,
-        node.position,
-        edges.filter(edge => edge.start_id === node.id).map(edge => ({
+        layoutNode.id,
+        node,
+        layoutNode.position,
+        edges.filter(edge => edge.start_id === layoutNode.id).map(edge => ({
             'target': edge.end_id.toString(),
             'points': edge.points,
             'point': edge.points[0],
         })),
-        edges.filter(edge => edge.end_id === node.id).map(edge => ({
+        edges.filter(edge => edge.end_id === layoutNode.id).map(edge => ({
             'target': edge.start_id.toString(),
             'points': edge.points,
             'point': edge.points[edge.points.length - 1],
@@ -62,13 +64,13 @@ class GraphVizualization {
             WIDTH,
             HEIGHT,
         ).then((output: StandarisedLayout) => {
-            this.vizNodes = output.nodes.map((node: StandarisedLayoutNode) => 
-                constructViznode(node, output.edges, WIDTH, HEIGHT));
+            this.vizNodes = output.nodes.map((layoutNode: StandarisedLayoutNode, idx: number) => 
+                constructViznode(layoutNode, graph.nodes[idx], output.edges, WIDTH, HEIGHT));
             this.vizEdges = output.edges.map((edge: StandarisedLayoutEdge) => 
-                new VizEdge(edge.points));
+                new VizEdge(edge.start_id, edge.end_id, edge.points));
 
             _.zip(this.vizNodes, graph.nodes).forEach(([vizNode, graphNode]) => {
-                vizNode!.compute_bindings_position(
+                vizNode!.computeBindingsPosition(
                     this.bindingClass,
                     graphNode![INCOMMING],
                     graphNode![OUTGOING],

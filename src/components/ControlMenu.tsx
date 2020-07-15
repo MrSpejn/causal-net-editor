@@ -104,7 +104,7 @@ class ControlMenu extends React.Component<Props, State> {
     }
 
     addConnectionAndReset = () => {
-        if (this.state.connectionInProgress && this.state.connectionInProgress.origin && this.state.connectionInProgress.destination.length) {
+        if (this.state.connectionInProgress && this.state.connectionInProgress.origin != null && this.state.connectionInProgress.destination.length) {
             const newGraph = this.props.controller!.graph!.addConnection(this.state.connectionInProgress);
             this.props.controller!.init(newGraph);
 
@@ -131,7 +131,6 @@ class ControlMenu extends React.Component<Props, State> {
                     }) as ConnectionInProgress
                 });
             } else {
-                console.log('HERE HERE')
                 this.setState({
                     connectionInProgress: {
                         ...this.state.connectionInProgress!,
