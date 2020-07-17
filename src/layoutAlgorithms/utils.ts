@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { StandarisedLayout, BoundingBox } from "./types";
 import { Point } from '../graphVisualization/types';
 
-export function compute_bounding_box(output: StandarisedLayout, scale: number): BoundingBox {
+export function computeBoundingBox(output: StandarisedLayout, scale: number): BoundingBox {
     const nodes_positions = output.nodes.map(node => node.position);
     const edges_positions = _.flatten(output.edges.map(edge => edge.points));
 

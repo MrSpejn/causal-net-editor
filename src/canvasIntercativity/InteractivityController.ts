@@ -4,7 +4,7 @@ import Graph from '../graphRepresentation/Graph';
 import SugiyamaLayout from '../layoutAlgorithms/SugiyamaLayout';
 import RandomLayering from '../bindingLayeringAlgorithms/RandomLayering';
 import GraphVisualization from '../graphVisualization/GraphVisualization';
-import { compute_bounding_box } from '../layoutAlgorithms/utils';
+import { computeBoundingBox } from '../layoutAlgorithms/utils';
 import ElementRegistry, { ElementData, ElementType, AnchorData, NodeData } from './ElementRegistry';
 import { StandarisedLayout } from '../layoutAlgorithms/types';
 
@@ -27,13 +27,15 @@ class InteractivityController extends EventEmitter {
     graph?: Graph;
     visualization?: GraphVisualization;
     elementRegistry?: ElementRegistry;
-    scale: number = 1;
+    scale: number;
     offsetY: number = 0;
     offsetX: number = 0;
     
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, scale: number = 0, scrollTop: number = -1, scrollLeft: number = -1) {
         super();
         
+        this.scale = scale;
+
         this.canvas = canvas;
         canvas.parentElement?.addEventListener('wheel', event => {
             event.preventDefault();
@@ -65,19 +67,21 @@ class InteractivityController extends EventEmitter {
 
         canvas!.height = canvas!.parentElement!.clientHeight * 2;
         canvas!.width = canvas!.parentElement!.clientWidth * 2;
-        canvas.parentElement!.scrollTop = canvas!.parentElement!.clientHeight / 2;
-        canvas.parentElement!.scrollLeft = canvas!.parentElement!.clientWidth / 2;
+        canvas.parentElement!.scrollTop = scrollTop !== -1 ? scrollTop : canvas!.parentElement!.clientHeight / 2;
+        canvas.parentElement!.scrollLeft = scrollLeft !== -1 ? scrollLeft : canvas!.parentElement!.clientWidth / 2;
     }
 
     init(graph: Graph): void {
         this.elementRegistry = new ElementRegistry();
         this.visualization = new GraphVisualization(SugiyamaLayout, RandomLayering, this.elementRegistry);
         this.visualization!.computeGraphicalRepresentation(graph).then((layout) => {
-            const boundingBox = compute_bounding_box(layout, 1);
+            const boundingBox = computeBoundingBox(layout, 1);
             const minWidth = this.canvas!.parentElement!.clientWidth;
             const minHeight = this.canvas!.parentElement!.clientHeight;
             
-            this.scale = Math.min(minWidth / boundingBox.width, minHeight / boundingBox.height);
+            if (this.scale === 0) {
+                this.scale = Math.min(minWidth / boundingBox.width, minHeight / boundingBox.height);
+            }
             this.renderGraphOnScreen(graph).then(() => {
                 this.graph = graph;
                 this.emit(this.onInit);
@@ -88,7 +92,7 @@ class InteractivityController extends EventEmitter {
 
     renderGraphOnScreen(graph: Graph): Promise<StandarisedLayout> {
         return this.visualization!.computeGraphicalRepresentation(graph).then(layout => {
-            const boundingBox = compute_bounding_box(layout, this.scale);
+            const boundingBox = computeBoundingBox(layout, this.scale);
             const minWidth = this.canvas!.parentElement!.clientWidth * 2;
             const minHeight = this.canvas!.parentElement!.clientHeight * 2;
             this.canvas!.width = Math.max(boundingBox.width, minWidth);

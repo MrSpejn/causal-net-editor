@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/dragscroll": "^0.0.0",
     "@types/victor": "^1.1.0",
     "dragscroll": "^0.0.8",
     "elkjs": "^0.6.2",

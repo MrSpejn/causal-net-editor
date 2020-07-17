@@ -13,6 +13,7 @@ import { ConnectionInProgress } from '../graphRepresentation/types';
 
 interface Props {
     controller: InteractivityController | null,
+    switchMode: () => void,
 }
 
 interface State {
@@ -31,7 +32,7 @@ const initialState = {
     removingNodes: false,
 };
 
-class ControlMenu extends React.Component<Props, State> {
+class EditMenu extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
@@ -184,7 +185,11 @@ class ControlMenu extends React.Component<Props, State> {
                         ></Button>
                     </div>
                     <div className="menu__center-section">
-                        <Button variant="contained" color="primary">Replay Log</Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={this.props.switchMode}
+                        >Replay Log</Button>
                         <Button color="primary">Instructions</Button>
 
                     </div>
@@ -199,4 +204,4 @@ class ControlMenu extends React.Component<Props, State> {
     }
 }
 
-export default ControlMenu;
+export default EditMenu;

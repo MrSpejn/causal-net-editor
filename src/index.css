@@ -38,6 +38,10 @@ code {
   overflow: scroll;
 }
 
+.app__mode {
+  width: 100%;
+  height: 100%;
+}
 .app__canvas {
   margin: 0 auto;
 }

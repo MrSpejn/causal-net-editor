@@ -1,45 +1,67 @@
 import React from 'react';
-import Graph from './graphRepresentation/Graph';
 
-import JSONGraph from './graphSepsis';
-import InteractivityController from './canvasIntercativity/InteractivityController';
-import ControlMenu from './components/ControlMenu';
+import EditMode from './components/EditMode';
+import ReplayMode from './components/ReplayMode';
+import { CrossModeData } from './components/types';
 
 interface Props {}
 
 interface State {
-    controller: InteractivityController | null,
+    replayMode: boolean,
 }
 
 class App extends React.Component<Props, State> {
     canvas?: HTMLCanvasElement;
+    crossModeData: CrossModeData;
 
     constructor(props: Props) {
         super(props);
 
         this.state = {
-            controller: null,
+            replayMode: false,
+        };
+
+        this.crossModeData = {
+            canvasDisplay: {
+                scale: 0,
+                scrollTop: -1,
+                scrollLeft: -1,
+            },
+            graph: null,
         };
     }
 
-    componentDidMount() {
-        const graph = Graph.fromJSON(JSON.stringify(JSONGraph));
-        const canvas = document.querySelector('canvas')!;
-        const controller = new InteractivityController(canvas);
+    startReplayMode = (crossModeData: CrossModeData) => { this.crossModeData = crossModeData; this.setState({ replayMode: true }); }
+    startEditMode = (crossModeData: CrossModeData) => { this.crossModeData = crossModeData; this.setState({ replayMode: false }); }
 
-        controller.init(graph);
-        this.setState({
-            controller,
-        });
+    renderCanvas() {
+        return (
+            <div className="app__canvas-container dragscroll">
+                <canvas ref={(ref) => { this.canvas = ref!; }} className="app__canvas"></canvas>
+            </div>
+        );
+    }
+    
+    renderEditMode() {
+        return (
+            <EditMode crossModeData={this.crossModeData} switchMode={this.startReplayMode}>
+                {this.renderCanvas()}
+            </EditMode>
+        );
+    }
+
+    renderReplayMode() {
+        return (
+            <ReplayMode crossModeData={this.crossModeData} switchMode={this.startEditMode}>
+                {this.renderCanvas()}
+            </ReplayMode>
+        );
     }
 
     render() {
         return (
             <div className="app">
-                <ControlMenu controller={this.state.controller} />
-                <div className="app__canvas-container dragscroll">
-                    <canvas ref={(ref) => { this.canvas = ref!; }} className="app__canvas"></canvas>
-                </div>
+                {this.state.replayMode ? this.renderReplayMode() : this.renderEditMode()}
             </div>
         );
     }
