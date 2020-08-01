@@ -106,3 +106,26 @@ code {
   font-size: 14px;
   margin: 5px 0;
 }
+
+.replay-mode .app__canvas-container {
+  height: calc(100% - 160px);
+}
+
+.app__canvas-container::-webkit-scrollbar {
+  width: 0;
+}
+
+.replay-mode__controls {
+  box-shadow: 0 -4px 4px 0 #ccc;
+  height: 80px;
+  width: 100%;
+  padding: 0 8em 0 2em;
+  display: flex;
+  align-items: center;
+}
+.replay-mode__control-buttons {
+  flex: 0 0 240px;
+}
+.replay-mode__timeline {
+  width: 100%;
+}

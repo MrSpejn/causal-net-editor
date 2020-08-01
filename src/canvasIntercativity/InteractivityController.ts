@@ -1,12 +1,15 @@
 
 import { EventEmitter } from 'typed-event-emitter';
 import Graph from '../graphRepresentation/Graph';
-import SugiyamaLayout from '../layoutAlgorithms/SugiyamaLayout';
-import RandomLayering from '../bindingLayeringAlgorithms/RandomLayering';
+import { layouts } from '../layoutAlgorithms';
+import { bindingAlgorithms } from '../bindingLayeringAlgorithms/';
+
 import GraphVisualization from '../graphVisualization/GraphVisualization';
 import { computeBoundingBox } from '../layoutAlgorithms/utils';
 import ElementRegistry, { ElementData, ElementType, AnchorData, NodeData } from './ElementRegistry';
 import { StandarisedLayout } from '../layoutAlgorithms/types';
+
+import config from '../config.json'
 
 function computeElementOnCanvas(event: MouseEvent, elementRegistry: ElementRegistry,
                                 scale: number, offsetX: number, offsetY: number): ElementData | undefined {
@@ -73,7 +76,11 @@ class InteractivityController extends EventEmitter {
 
     init(graph: Graph): void {
         this.elementRegistry = new ElementRegistry();
-        this.visualization = new GraphVisualization(SugiyamaLayout, RandomLayering, this.elementRegistry);
+        this.visualization = new GraphVisualization(
+            layouts[config.layout],
+            bindingAlgorithms[config.bindingAlgorithm],
+            this.elementRegistry,
+        );
         this.visualization!.computeGraphicalRepresentation(graph).then((layout) => {
             const boundingBox = computeBoundingBox(layout, 1);
             const minWidth = this.canvas!.parentElement!.clientWidth;
@@ -112,6 +119,16 @@ class InteractivityController extends EventEmitter {
             );
             return layout;
         });
+    }
+    
+    refreshGraph() {
+        this.visualization!.drawOnCanvas(
+            this.canvas!,
+            this.scale,
+            0, 1,
+            this.offsetX,
+            this.offsetY,
+        );
     }
 
 }

@@ -19,7 +19,12 @@
     "noEmit": true,
     "jsx": "react"
   },
+  "paths": {
+    "viz.js": [
+      ".sink.d.ts"
+    ],
+  },
   "include": [
-    "src"
+    "src", "graphs/graph.js", "graphs/graph4.js", "graphs/graph2.js", "graphs/graphSepsis.js"
   ]
 }

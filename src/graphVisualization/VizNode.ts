@@ -57,7 +57,6 @@ class VizNode {
             ...outgoing_connections.map(conn => ({ in: false, nodes: conn })),
         ]
         const binder = new binding_class();
-
         this.bindings = binder.computeBindings(this.anchors, connections);
         this.connections = connections;
     }

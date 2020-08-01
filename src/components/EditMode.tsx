@@ -3,7 +3,7 @@ import InteractivityController from '../canvasIntercativity/InteractivityControl
 import EditMenu from './EditMenu';
 import { CrossModeData } from './types';
 import Graph from '../graphRepresentation/Graph';
-import JSONGraph from '../graphSepsis';
+import JSONGraph from '../graphs/graphSepsis';
 import dragscroll from 'dragscroll';
 
 interface Props {

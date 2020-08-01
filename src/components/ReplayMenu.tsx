@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 
 import InteractivityController from '../canvasIntercativity/InteractivityController';
 import { Button } from '@material-ui/core';
@@ -6,6 +6,7 @@ import { Button } from '@material-ui/core';
 interface Props {
     controller: InteractivityController | null,
     switchMode: () => void,
+    loadLog: (e: ChangeEvent<HTMLInputElement>) => void,
 }
 
 interface State {}
@@ -28,7 +29,18 @@ class ReplayMenu extends React.Component<Props, State> {
 
                 </div>
                 <div className="menu__right-section">
-                   
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        component="label"
+                    >
+                        Load Log
+                        <input
+                            type="file"
+                            style={{ display: "none" }}
+                            onChange={this.props.loadLog}
+                        />
+                    </Button>
                 </div>
                 </div>
             </div>

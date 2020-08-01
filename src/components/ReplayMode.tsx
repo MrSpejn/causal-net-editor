@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import InteractivityController from '../canvasIntercativity/InteractivityController';
 import ReplayMenu from './ReplayMenu';
 import { CrossModeData } from './types';
 import dragscroll from 'dragscroll';
+import { readSingleFile } from '../utils/utils';
+import XESLogLoader from '../logLoaders/XESLogLoader';
+import ProcessLog from '../logLoaders/ProcessLog';
+import ReplayControls from './ReplayControls';
 
 interface Props {
     crossModeData: CrossModeData,
@@ -12,6 +16,7 @@ interface Props {
 
 interface State {
     controller: InteractivityController | null,
+    log: ProcessLog | null,
 }
 
 class ReplayMode extends React.Component<Props, State> {
@@ -20,6 +25,7 @@ class ReplayMode extends React.Component<Props, State> {
 
         this.state = {
             controller: null,
+            log: null,
         };
     }
 
@@ -51,16 +57,29 @@ class ReplayMode extends React.Component<Props, State> {
         });
     }
 
+    loadLog = (event: ChangeEvent<HTMLInputElement>) => {
+        readSingleFile(event.target!.files![0]).then(text => {
+            const loader = new XESLogLoader();
+            loader.loadLog(text).then(log => {
+                this.setState({
+                    log,
+                });
+            });
+        });
+    }
+
     render() {
         return (
             <div className="app__mode replay-mode">
-                 <ReplayMenu
+                <ReplayMenu
                     controller={this.state.controller}
                     switchMode={this.switchMode}
+                    loadLog={this.loadLog}
                 />
                 <div className="app__canvas-container dragscroll">
                     <canvas className="app__canvas"></canvas>
                 </div>
+                <ReplayControls />
             </div>
         );
     }
