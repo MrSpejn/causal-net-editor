@@ -15,20 +15,17 @@ class DotLayout implements GraphLayout {
     }
     compute_positions(adj_matrix: AdjacencyMatrix, node_ids: Array<string>, width: number, height: number): Promise<StandarisedLayout> {        
         const edges: string[] = []
-        console.log(adj_matrix)
         adj_matrix.forEach((row, rowID) => row.forEach((cell, colID) => {
             if (cell > 0) {
                 edges.push(`${node_ids[rowID]} -> ${node_ids[colID]};`)
             }
         }))
         const graph = `digraph G {\n${edges.join("\n")}\n} `
-        console.log(graph)
         return this.viz.renderJSONObject(graph, { engine: this.engine })
             .then((output: any) => this.reduce_to_common_standard(output))
     }
 
     reduce_to_common_standard(output: any): StandarisedLayout {
-        console.log(output)
         try {
             const width = parseFloat(output.bb.split(",")[3])
             const node_ids = output.objects!.map((n: any) => n)
@@ -51,7 +48,6 @@ class DotLayout implements GraphLayout {
             }
             standardForm.nodes = _.sortBy(standardForm.nodes, n => parseInt(n.id))
             addCloserPointsToEdges(standardForm)
-            console.log(standardForm)
             return standardForm
         } catch (e) {
             console.error(e)
