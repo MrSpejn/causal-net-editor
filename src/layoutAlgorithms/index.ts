@@ -1,14 +1,14 @@
 import DotLayout from "./DotLayout";
 import NeatoLayout from "./NeatoLayout";
-import SugiyamaLayout from "./SugiyamaLayout";
-import { GraphLayout } from "./types";
+// import SugiyamaLayout from "./SugiyamaLayout";
+import { GraphLayout, ConstructParams } from "./types";
 
-const SugiyamaLayoutName = "SUGIYAMA_LAYOUT"
-const NeatoLayoutName = "NEATO_LAYOUT"
-const DotLayoutName = "DOT_LAYOUT"
+export const SUGIYAMA_LAYOUT = "SUGIYAMA_LAYOUT"
+export const NEATO_LAYOUT = "NEATO_LAYOUT"
+export const DOT_LAYOUT = "DOT_LAYOUT"
 
-export const layouts: {[key: string]: new () => GraphLayout} = {
-    [SugiyamaLayoutName]: SugiyamaLayout,
-    [NeatoLayoutName]: NeatoLayout,
-    [DotLayoutName]: DotLayout,
+export const layouts: {[key: string]: new (p: ConstructParams) => GraphLayout} = {
+    // [SUGIYAMA_LAYOUT]: SugiyamaLayout,
+    [NEATO_LAYOUT]: NeatoLayout,
+    [DOT_LAYOUT]: DotLayout,
 }

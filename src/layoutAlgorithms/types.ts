@@ -1,8 +1,11 @@
 import { Point } from '../graphVisualization/types';
 import { AdjacencyMatrix } from '../graphRepresentation/types';
 
+export type ConstructParams = {
+    [key: string]: any,
+}
 export interface GraphLayout {
-    compute_positions(
+    computePositions(
         adj_matrix: AdjacencyMatrix, node_ids: Array<string>,
         width: number, height: number): Promise<StandarisedLayout>
 }

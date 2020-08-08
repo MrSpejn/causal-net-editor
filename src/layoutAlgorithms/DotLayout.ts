@@ -3,17 +3,21 @@ import Viz from 'viz.js'
 import _ from 'lodash'
 
 import { AdjacencyMatrix } from '../graphRepresentation/types';
-import { StandarisedLayout, GraphLayout } from './types';
+import { StandarisedLayout, GraphLayout, ConstructParams } from './types';
 import { Point } from '../graphVisualization/types';
 import { findPointOnLine } from '../graphVisualization/viz_helpers';
 
 class DotLayout implements GraphLayout {
     engine: string = "dot"
     viz: any
-    constructor() {
-        this.viz = new Viz({workerURL: "./full.render.js"})
+    constructor(params: ConstructParams) {
+        if (!params) {
+            this.viz = new Viz({workerURL: "./full.render.js"})
+        } else {
+            this.viz = new Viz(params)
+        }
     }
-    compute_positions(adj_matrix: AdjacencyMatrix, node_ids: Array<string>, width: number, height: number): Promise<StandarisedLayout> {        
+    computePositions(adj_matrix: AdjacencyMatrix, node_ids: Array<string>, width: number, height: number): Promise<StandarisedLayout> {        
         const edges: string[] = []
         adj_matrix.forEach((row, rowID) => row.forEach((cell, colID) => {
             if (cell > 0) {
@@ -22,10 +26,10 @@ class DotLayout implements GraphLayout {
         }))
         const graph = `digraph G {\n${edges.join("\n")}\n} `
         return this.viz.renderJSONObject(graph, { engine: this.engine })
-            .then((output: any) => this.reduce_to_common_standard(output))
+            .then((output: any) => this.reduceToCommonStandard(output))
     }
 
-    reduce_to_common_standard(output: any): StandarisedLayout {
+    reduceToCommonStandard(output: any): StandarisedLayout {
         try {
             const width = parseFloat(output.bb.split(",")[3])
             const node_ids = output.objects!.map((n: any) => n)

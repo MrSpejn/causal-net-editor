@@ -16,7 +16,7 @@ import ElementRegistry from '../canvasIntercativity/ElementRegistry';
 const WIDTH = 30
 const HEIGHT = 30
 
-function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, edges: Array<StandarisedLayoutEdge>,
+export function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, edges: Array<StandarisedLayoutEdge>,
                           width: number, height: number): VizNode {
     return new VizNode(
         layoutNode.id,
@@ -58,7 +58,7 @@ class GraphVizualization {
     }
 
     computeGraphicalRepresentation(graph: Graph): Promise<StandarisedLayout> {
-        return (this.graphLayout).compute_positions(
+        return (this.graphLayout).computePositions(
             graph.adj_matrix,
             graph.nodes.map(n => n.id.toString()),
             WIDTH,

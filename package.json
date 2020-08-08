@@ -14,15 +14,17 @@
     "dragscroll": "^0.0.8",
     "elkjs": "^0.6.2",
     "event-emitter": "^0.3.5",
+    "jstat": "^1.9.3",
     "lodash": "^4.17.15",
+    "mathjs": "^7.1.0",
     "moment": "^2.27.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
+    "tiny-worker": "^2.3.0",
     "typed-event-emitter": "^2.0.0",
     "typescript": "^3.9.5",
-    "victor": "^1.1.0",
-    "webworker-threads": "^0.7.17"
+    "victor": "^1.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -46,6 +48,7 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.155"
+    "@types/lodash": "^4.14.155",
+    "@types/mathjs": "^6.0.5"
   }
 }
