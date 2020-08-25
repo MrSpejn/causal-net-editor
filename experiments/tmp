@@ -1,0 +1,149 @@
+const groups = [
+    ['0.1_12', {
+        ...baseParams,
+        expectedGraphSaturation: .1,
+        tierWeights: _.range(12).map(() => 1),
+    }],
+    ['0.1_8', {
+        ...baseParams,
+        expectedGraphSaturation: .1,
+        tierWeights: _.range(8).map(() => 1),
+    }],
+    ['0.1_4', {
+        ...baseParams,
+        expectedGraphSaturation: .1,
+        tierWeights: _.range(4).map(() => 1),
+    }],
+    ['0.1_2', {
+        ...baseParams,
+        expectedGraphSaturation: .1,
+        tierWeights: _.range(2).map(() => 1),
+    }],
+    ['0.1_2_mostly_front', {
+        ...baseParams,
+        expectedGraphSaturation: .1,
+        tierWeights: _.range(2).map(() => 1),
+        edgeDistribution: number => [
+            ..._.range(Math.ceil(number / 2)).map(() => 10),
+            ..._.range(Math.floor(number / 2)).map(() => 2),
+        ],
+    }],
+    ['0.2_12', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        tierWeights: _.range(12).map(() => 1),
+    }],
+    ['0.2_8', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        tierWeights: _.range(8).map(() => 1),
+    }],
+    ['0.2_4', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        tierWeights: _.range(4).map(() => 1),
+    }],
+    ['0.2_2', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        tierWeights: _.range(2).map(() => 1),
+    }],
+    ['0.2_2_mostly_front', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        tierWeights: _.range(2).map(() => 1),
+        edgeDistribution: number => [
+            ..._.range(Math.ceil(number / 2)).map(() => 10),
+            ..._.range(Math.floor(number / 2)).map(() => 2),
+        ],
+    }],
+    ['0.3_12', {
+        ...baseParams,
+        expectedGraphSaturation: .3,
+        tierWeights: _.range(12).map(() => 1),
+    }],
+    ['0.3_8', {
+        ...baseParams,
+        expectedGraphSaturation: .3,
+        tierWeights: _.range(8).map(() => 1),
+    }],
+    ['0.3_4', {
+        ...baseParams,
+        expectedGraphSaturation: .3,
+        tierWeights: _.range(4).map(() => 1),
+    }],
+    ['0.3_2', {
+        ...baseParams,
+        expectedGraphSaturation: .3,
+        tierWeights: _.range(2).map(() => 1),
+    }],
+    ['0.3_2_mostly_front', {
+        ...baseParams,
+        expectedGraphSaturation: .3,
+        tierWeights: _.range(2).map(() => 1),
+        edgeDistribution: number => [
+            ..._.range(Math.ceil(number / 2)).map(() => 10),
+            ..._.range(Math.floor(number / 2)).map(() => 2),
+        ],
+    }],    
+]
+
+
+
+function testBindingAlgoritmForGraph(alg: BindingLayering) {
+    const connections: Array<Connection> = [
+        { in: false, nodes: [1, 2] },
+        { in: true, nodes: [1, 2] },
+        { in: true, nodes: [1] },
+        { in: true, nodes: [2, 3] },
+        { in: false, nodes: [3] },
+        { in: false, nodes: [2, 3] },
+    ];
+
+    const anchors: Array<Anchor> = [{
+        target: "1",
+        angle: 0,
+        in: false,
+        point: [0, 0],
+        points: [],
+    },
+    {
+        target: "1",
+        angle: Math.PI / 4,
+        in: true,
+        point: [0, 0],
+        points: [],
+    },
+    {
+        target: "2",
+        angle: Math.PI / 2,
+        in: false,
+        point: [0, 0],
+        points: [],
+    },
+    {
+        target: "2",
+        angle: 3 * Math.PI / 4,
+        in: true,
+        point: [0, 0],
+        points: [],
+    },
+    {
+        target: "3",
+        angle: Math.PI,
+        in: false,
+        point: [0, 0],
+        points: [],
+    },
+    {
+        target: "3",
+        angle: 5 * Math.PI / 4,
+        in: true,
+        point: [0, 0],
+        points: [],
+    }]
+    const anchorConnections = alg.translateToAnchorIndexConnections(anchors, connections);
+    const[bindings, layers] = alg.computeBindings(anchors, anchorConnections);
+    
+    console.log(bindings, layers);
+}

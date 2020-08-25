@@ -1,18 +1,10 @@
 import Victor from 'victor';
-import { Point } from './types';
-
-interface ContextOptions {
-    [key: string]: any;
-};
- 
-interface RegistrationData {
-    [key: string]: any;
-}
+import { Point, ContextOptions } from './types';
 
 const DEFAULT_ARROW_LENGTH = 4;
 const DEFAULT_ARROW_WIDTH = 5;
 
-class DrawingContext {
+class CanvasDrawingContext {
     context: CanvasRenderingContext2D;
     SCALE: number;
     X: number;
@@ -68,18 +60,18 @@ class DrawingContext {
     }
 
     drawSegmentedArrow(points: Array<Point>, contextOptions: ContextOptions): void {
-        this.drawSegmentedLine(points, {...contextOptions, fill: false, cfill: false, stroke: true });
+        this._drawSegmentedLine(points, {...contextOptions, fill: false, cfill: false, stroke: true });
         const last = points[points.length - 1];
         const prelast = points[points.length - 2];
 
-        this.drawArrowHead(
+        this._drawArrowHead(
             points[points.length - 1],
             [last[0] - prelast[0], last[1] - prelast[1]],
             {...contextOptions, fill: false, cfill: true },
         )
     }
 
-    drawArrowHead(origin: Point, directionVector: Point, contextOptions: ContextOptions): void {
+    _drawArrowHead(origin: Point, directionVector: Point, contextOptions: ContextOptions): void {
         this.context.beginPath();
         const origin_v = new Victor(...origin);
         
@@ -107,7 +99,7 @@ class DrawingContext {
         this._applyContextOptions(contextOptions, true);
     }
 
-    drawSegmentedLine(points: Array<Point>, contextOptions: ContextOptions): void {
+    _drawSegmentedLine(points: Array<Point>, contextOptions: ContextOptions): void {
         this.context.beginPath();
         points.forEach((point) => {
             this.context.lineTo(...this._coord(point));
@@ -148,16 +140,25 @@ class DrawingContext {
 
         this.context.font = `${initialFont}px Arial`;
 
-        const measurements = this.context.measureText(text);
-        const height = measurements.actualBoundingBoxAscent + measurements.actualBoundingBoxDescent
-        const scale = Math.min(targetWidth / measurements.width, targetWidth / height)
+        const words = text.split(' ');
+        const segments = words.map(word => this.context.measureText(word.padStart(5, "0")));
+
+        const height = segments.length * initialFont * 1.9;
+        
+        const width = segments.reduce((max, m) => (max > m.width ? max : m.width), 0)
+
+        const scale = Math.min(targetWidth / width, targetWidth / height)
 
         this.context.font = `${Math.floor(initialFont * scale)}px Arial`;
+        const lineHeight = initialFont * scale * 1.1
 
-        const coord = this._coord([position[0], position[1]]);
-        this.context.fillText(text, coord[0], coord[1]);
-
+        const start = -words.length / 2 + 0.5
+        const end = start * -1
+        for (let i = start, j = 0; i <= end; i++, j++) {
+            const coord = this._coord([position[0], position[1]]);
+            this.context.fillText(words[j], coord[0], coord[1] + i * lineHeight);
+        }
     }
 }
 
-export default DrawingContext;
+export default CanvasDrawingContext;

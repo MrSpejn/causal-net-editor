@@ -1,5 +1,5 @@
 {
-    "layout": "DOT_LAYOUT",
-    "bindingAlgorithm": "RANDOM_LAYERING"
+    "layout": "NEATO_LAYOUT",
+    "bindingAlgorithm": "GREEDY_LAYERING"
 
 }

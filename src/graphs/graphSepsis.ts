@@ -11,7 +11,7 @@ export const JSONGraph = {
             "id": 1,
             "name": "ER Registration",
             "additional_info": {},
-            "outgoing": [[2, 3, 4]],
+            "outgoing": [[2, 3, 4, 5, 6]],
             "incomming": [[0]]
         },
         {

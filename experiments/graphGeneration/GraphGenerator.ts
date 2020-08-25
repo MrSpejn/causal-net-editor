@@ -1,14 +1,14 @@
 import { getRandomGraph, selectBindings, GenerationParams } from "./utils";
-import { paramSets } from './paramsSets';
 
 export class GraphGenerator {
     params: GenerationParams;
 
-    generateGraphWithSpecs(specName) {
-        this.params = paramSets[specName];
+    generateGraphWithSpecs(params): [string, object] {
+        this.params = params;
         const tmp = getRandomGraph(this.params)
         const adjMatrix = tmp[0]
         const nodes = tmp[1]
+        const logs = tmp[2]
 
         const nodesWithConnections = nodes.map((node, idx) => ({
             node: node,
@@ -22,9 +22,9 @@ export class GraphGenerator {
                 .map(({ cidx }) => nodes[cidx]),
         }));
 
-        return JSON.stringify({
+        return [JSON.stringify({
             nodes: nodesWithConnections.map(node => this.addBindings(node)),
-        });
+        }), logs];
     }
 
     addBindings(node) {
@@ -42,8 +42,8 @@ export class GraphGenerator {
         if (targets.length === 1) return [
             [targets[0]],
         ];
-        const lowerBound = Math.min(targets.length, 40);
-        const upperBound = Math.min(targets.length * 2, 40);
+        const lowerBound = this.params.nBindLowerBound(targets);
+        const upperBound = this.params.nBindUpperBound(targets);
 
         const nBindings = Math.random() * (upperBound - lowerBound) + lowerBound;
 

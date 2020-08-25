@@ -23,7 +23,8 @@ class GreedyLayering extends BaseLayering implements BindingLayering {
 
             let fittingOrdering: PairOfSequences | null = null;
 
-            layers.forEach((layer, layerNo) => {
+            for (let layerNo = 0; layerNo < layers.length; layerNo++) {
+                const layer = layers[layerNo];
                 for (let ordering of orderings) {
                     if (doesOrderingFit(layer, ordering[1])) {
                         fittingOrdering = ordering
@@ -36,9 +37,9 @@ class GreedyLayering extends BaseLayering implements BindingLayering {
                         sequence: fittingOrdering[0],
                         layer_n: layerNo,
                     });
-                    return
+                    break
                 } 
-            })
+            }
             if (fittingOrdering == null) {
                 layers.push(newEmptyLayer(anchors.length))
                 applyOrderingToLayer(layers[layers.length - 1], orderings[0][1])

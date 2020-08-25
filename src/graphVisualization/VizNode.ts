@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { findPointOnLine } from './viz_helpers';
-import DrawingContext from './DrawingContext';
+import CanvasDrawingContext from './CanvasDrawingContext';
 
 import {
     Anchor,
@@ -62,7 +62,7 @@ class VizNode {
         this.connections = connections;
     }
 
-    draw(context: DrawingContext, elementRegistry: ElementRegistry) {
+    draw(context: CanvasDrawingContext, elementRegistry: ElementRegistry) {
         context.drawCircle(this.position, (this.width / 2), {
             'lineWidth': .75,
             'stroke': true,
@@ -73,20 +73,21 @@ class VizNode {
         });
         context.drawText(this.node.name, this.position, this.width);
 
+        console.log(this.connections, this.bindings)
         this.bindings.forEach((binding, idx) => this.drawBinding(binding, this.connections![idx], context, elementRegistry));
     }
 
-    drawBinding(binding: Binding, conn: Connection, context: DrawingContext, elementRegistry: ElementRegistry) {
-        const distance = 19 + 4 * binding.layer_n;
+    drawBinding(binding: Binding, conn: Connection, context: CanvasDrawingContext, elementRegistry: ElementRegistry) {
+        const distance = 60 + 8 * binding.layer_n;
 
         const points = binding.sequence.map(anchor_idx => {
             const point = findPointOnLine(this.position, this.anchors[anchor_idx].points, distance, conn.in)
             
-            context.drawCircle(point, 2, {
+            context.drawCircle(point, 4, {
                 fillStyle:  anchor_idx === 0 ? 'green' : 'black',
                 cfill: true,
             });
-            elementRegistry.registerElement(point, 2, {
+            elementRegistry.registerElement(point, 4, {
                 type: ElementType.ANCHOR,
                 anchor: this.anchors[anchor_idx],
                 connection: conn, 

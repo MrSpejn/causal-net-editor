@@ -18,7 +18,6 @@ type BoundedEdge = {
     segments: Array<Segment>
 }
 
-let log = false;
 function wrapEdgeBoundry(edge: StandarisedLayoutEdge): BoundedEdge {
     return {
         minX: Math.min(...edge.points.map(p => p[0])),
@@ -61,11 +60,9 @@ function doSegmentsBoundriesIntersect(segment1: Segment, segment2: Segment): boo
 }
 
 function checkIfLinesCross(edge1: BoundedEdge, edge2: BoundedEdge): boolean {
-    if (log) console.log(doBoundriesIntersect(edge1, edge2))
     if (!doBoundriesIntersect(edge1, edge2)) return false;
     const segs1 = edge1.segments.filter(seg => doEdgeBountryAndSegmentIntersect(edge2, seg))
     const segs2 = edge2.segments.filter(seg => doEdgeBountryAndSegmentIntersect(edge1, seg))
-    if (log) console.log(segs1.length, segs2.length)
 
     for (let seg1 of segs1) {
         for (let seg2 of segs2) {
@@ -85,14 +82,7 @@ function checkIfLinesCross(edge1: BoundedEdge, edge2: BoundedEdge): boolean {
 export function nCrossingEdgesMetric(layout: StandarisedLayout): number {
 
     return layout.edges.map((edge1, idx1) => layout.edges.slice(idx1 + 1).filter(edge2 => {
-        if (edge1.start_id == "2" && edge1.end_id == "5" && edge2.start_id == "4" && edge2.end_id == "1") {
-            log = true;
-            console.log("Debug");
-        }
         const doCross = checkIfLinesCross(wrapEdgeBoundry(edge1), wrapEdgeBoundry(edge2));
-        if (edge1.start_id == "2" && edge1.end_id == "5" && edge2.start_id == "4" && edge2.end_id == "1") {
-            log = false;
-        }
         return doCross;
     }).length).reduce((sum, v) => sum + v, 0);
 }

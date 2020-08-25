@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@types/dragscroll": "^0.0.0",
     "@types/victor": "^1.1.0",
+    "cli-progress": "^3.8.2",
     "collect.js": "^4.28.0",
     "dragscroll": "^0.0.8",
     "elkjs": "^0.6.2",

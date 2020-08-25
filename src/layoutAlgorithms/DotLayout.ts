@@ -10,21 +10,29 @@ import { findPointOnLine } from '../graphVisualization/viz_helpers';
 class DotLayout implements GraphLayout {
     engine: string = "dot"
     viz: any
-    constructor(params: ConstructParams) {
+    layoutParams: object;
+    constructor(params: ConstructParams, layoutParams: object = {}) {
         if (!params) {
             this.viz = new Viz({workerURL: "./full.render.js"})
         } else {
             this.viz = new Viz(params)
         }
+        this.layoutParams = layoutParams;
     }
     computePositions(adj_matrix: AdjacencyMatrix, node_ids: Array<string>, width: number, height: number): Promise<StandarisedLayout> {        
         const edges: string[] = []
         adj_matrix.forEach((row, rowID) => row.forEach((cell, colID) => {
             if (cell > 0) {
-                edges.push(`${node_ids[rowID]} -> ${node_ids[colID]};`)
+                edges.push(`${node_ids[rowID]} -> ${node_ids[colID]} [minlen=1,len=1];`)
             }
         }))
-        const graph = `digraph G {\n${edges.join("\n")}\n} `
+
+        const nodes = node_ids.map(id => `${id} [width=0.01, height=0.01]`)
+        const graph = `digraph G {
+            ${Object.entries(this.layoutParams).map((pair) => `${pair[0]} = ${pair[1]}`).join("\n")}
+            \n${nodes.join("\n")} \n${edges.join("\n")}\n
+        }
+        `
         return this.viz.renderJSONObject(graph, { engine: this.engine })
             .then((output: any) => this.reduceToCommonStandard(output))
     }
@@ -51,7 +59,7 @@ class DotLayout implements GraphLayout {
                 })),
             }
             standardForm.nodes = _.sortBy(standardForm.nodes, n => parseInt(n.id))
-            addCloserPointsToEdges(standardForm)
+            addCloserPointsToEdges(standardForm, 2)
             return standardForm
         } catch (e) {
             console.error(e)
@@ -60,13 +68,13 @@ class DotLayout implements GraphLayout {
     }
 }
 
-function addCloserPointsToEdges(standardForm: any) {
+function addCloserPointsToEdges(standardForm: any, radius: number) {
     standardForm.edges.forEach((edge: any) => {
         const origin = standardForm.nodes[parseInt(edge.start_id)].position
         const destination = standardForm.nodes[parseInt(edge.end_id)].position
         
-        edge.points.unshift(findPointOnLine(origin, [origin, edge.points[0]], 15))
-        edge.points.push(findPointOnLine(destination, [destination, edge.points[edge.points.length - 1]], 15))
+        edge.points.unshift(findPointOnLine(origin, [origin, edge.points[0]], radius))
+        edge.points.push(findPointOnLine(destination, [destination, edge.points[edge.points.length - 1]], radius))
         
         // edge.points = edge.points.reverse();
     });

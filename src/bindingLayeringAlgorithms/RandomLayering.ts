@@ -12,6 +12,8 @@ import {
     getFittingOrdering,
     newEmptyLayer,
     applyOrderingToLayer,
+    getAllAnchorOrderings,
+    doesOrderingFit,
 } from '../bindingLayeringAlgorithms/utils';
 import BaseLayering from './BaseLayering';
 
@@ -26,17 +28,17 @@ class RandomLayering extends BaseLayering implements BindingLayering {
 
         anchorConnections.forEach((anchorIdx) => {
             let last_layer = layers[layers.length - 1];
-            let fitting_order = getFittingOrdering(last_layer, anchorIdx, anchors)
-            if (fitting_order === null) {
+            const ordering = getAllAnchorOrderings(anchorIdx, anchors.length)[0];
+
+            if (!doesOrderingFit(last_layer, ordering[1])) {
                 layers.push(newEmptyLayer(anchors.length))
                 last_layer = layers[layers.length - 1];
-                fitting_order = getFittingOrdering(last_layer, anchorIdx, anchors)!
             }
 
-            applyOrderingToLayer(last_layer, fitting_order[1])
+            applyOrderingToLayer(last_layer, ordering[1])
 
             sequescesWithLayerNumber.push({
-                sequence: fitting_order[0],
+                sequence: ordering[0],
                 layer_n: layers.length - 1,
             });
             

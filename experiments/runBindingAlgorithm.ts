@@ -1,48 +1,90 @@
-import { bindingAlgorithms, RANDOM_LAYERING } from '../src/bindingLayeringAlgorithms';
-import {
-    SMALL_N_EDGES,
-    MID_N_EDGES,
-    LARGE_N_EDGES,
-    MID_TALL,
-    MID_STANDARD,
-    MID_RANDOM,
-} from './graphGeneration/paramsSets';
-import { GraphGenerator } from './graphGeneration/GraphGenerator';
-import { DOT_LAYOUT, layouts } from '../src/layoutAlgorithms';
-import Graph, { INCOMMING, OUTGOING } from '../src/graphRepresentation/Graph';
 import fs from 'fs';
 import path from 'path';
 import Worker from 'tiny-worker';
+import cliProgress from 'cli-progress';
+
+import {
+    maxArcAbsoluteMetric,
+    maxArcRadialMetric,
+    nLayersMetric,
+} from './metrics/bindingMetrics';
 import { StandarisedLayout } from '../src/layoutAlgorithms/types';
 import { BindingLayering } from '../src/bindingLayeringAlgorithms/types';
-import { constructViznode } from '../src/graphVisualization/GraphVisualization';
-import { nLayersMetric, maxArcAbsoluteMetric,  maxArcRadialMetric } from './metrics/bindingMetrics';
-import { Node } from '../src/graphRepresentation/types';
+import { NEATO_LAYOUT, layouts } from '../src/layoutAlgorithms';
+import { bindingAlgorithms, GREEDY_LAYERING, RANDOM_LAYERING, VARIANT_SEARCH_LAYERING, ADVANCED_VARIANT_SEARCH_LAYERING} from '../src/bindingLayeringAlgorithms';
+import Graph, { INCOMMING, OUTGOING } from '../src/graphRepresentation/Graph';
+import { Node }  from '../src/graphRepresentation/types';
+import { constructViznode } from '../src/graphVisualization/GraphVisualization'; 
 
-function main() {
-    const generator = new GraphGenerator();
+function mean(list) {
+    return list.reduce((sum, x) => sum + x, 0) / list.length
+}
 
-    let generatedGraphJSON = generator.generateGraphWithSpecs(SMALL_N_EDGES);
+function chainLayerers(layererSet, graphs, worker, idx) {
+    if (idx >= layererSet.length) {
+        return Promise.resolve(true);
+    }
+    const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    // const bar = {
+    //     start: (a, b) => {},
+    //     increment: (a, b) => {},
+    // };
 
-    const generatedGraph = Graph.fromJSON(generatedGraphJSON)
+    bar.start(graphs.length, 0);
 
-    const worker = new Worker(path.resolve(__dirname, '../public/full.render.js'));
-    const LayoutAlg = new layouts[DOT_LAYOUT]({
-        worker,
+    return chainGraphs(layererSet[idx], graphs, worker, 0, [], bar).then((data) => {
+        saveResults(data, graphs, layererSet[idx]);
+        return chainLayerers(layererSet, graphs, worker, idx + 1);
     });
-    LayoutAlg.computePositions(
+}
+
+function chainGraphs(layerer, graphs, worker, idx, results, bar) {
+    if (idx >= graphs.length) {
+        return Promise.resolve(results);
+    }
+    return runLayerer(layerer, graphs[idx], worker).then((data) => {
+        results.push(data);
+        bar.increment();
+        return chainGraphs(layerer, graphs, worker, idx + 1, results, bar);
+    });
+}
+
+function runLayerer(layerer, graph, worker) {
+    const fields = graph.split(';')
+    const graphPath = `./experiments/instances/${fields[1]}/graph-${fields[0]}.json`;
+    const generatedGraph = Graph.fromJSON(fs.readFileSync(graphPath).toString());
+    const LayoutAlg = new layouts[NEATO_LAYOUT]({
+        worker,
+    }, {});
+    return LayoutAlg.computePositions(
         generatedGraph.adj_matrix,
         generatedGraph.nodes.map(n => n.id.toString()),
         1920,
         1080,
     ).then((layout) => {
-        worker.terminate();
-        runBindingAlgoritmForGraph(layout, generatedGraph.nodes, new bindingAlgorithms[RANDOM_LAYERING]());
+        const results = runLayeringAlgoritmForGraph(
+            layout,
+            generatedGraph.nodes,
+            new bindingAlgorithms[layerer.alg](),
+        );
+        return {
+            maxArcAbsolute: mean(results.map(x => x.maxArcAbsolute)),
+            maxArcRadial: mean(results.map(x => x.maxArcRadial)),
+            nLayers: mean(results.map(x => x.nLayers)),
+        };
+    }).catch((err) => {
+        console.error('Something went wrong')
+        return {
+            maxArcAbsolute: null,
+            maxArcRadial: null,
+            nLayers: null,
+        }
     });
 }
 
-function runBindingAlgoritmForGraph(graph: StandarisedLayout, nodes: Array<Node>, alg: BindingLayering) {
+function runLayeringAlgoritmForGraph(graph: StandarisedLayout, nodes: Array<Node>, alg: BindingLayering) {
     const vizNodes = graph.nodes.map((node, idx) => constructViznode(node, nodes[idx], graph.edges, 50, 50));
+    const results = [];
     for (let vizNode of vizNodes) {
         const connections = [
             ...vizNode.node[INCOMMING].map(conn => ({ in: true, nodes: conn })),
@@ -51,13 +93,64 @@ function runBindingAlgoritmForGraph(graph: StandarisedLayout, nodes: Array<Node>
         const anchorConnections = alg.translateToAnchorIndexConnections(vizNode.anchors, connections);
         const[bindings, layers] = alg.computeBindings(vizNode.anchors, anchorConnections);
         
-        console.log({
-            nLayersMetric: nLayersMetric(vizNode.anchors, bindings, layers),
-            maxArcAbsoluteMetric: maxArcAbsoluteMetric(vizNode.anchors, bindings, layers),
-            maxArcRadialMetric: maxArcRadialMetric(vizNode.anchors, bindings, layers),
+        results.push({
+            nLayers: nLayersMetric(vizNode.anchors, bindings, layers),
+            maxArcAbsolute: maxArcAbsoluteMetric(vizNode.anchors, bindings, layers),
+            maxArcRadial: maxArcRadialMetric(vizNode.anchors, bindings, layers),
         });
     }
-
+    return results
 }
 
-main()
+const RESULT_FILE = './experiments/results/bindings-results.csv';
+
+function saveResults(results, graphs, layerer) {
+    results.forEach((metrics, idx) => {
+        const graphUUID = graphs[idx].split(';')[0];
+        fs.appendFileSync(
+            RESULT_FILE,
+            `\n${layerer.name};${graphUUID};${Object.values(metrics).join(";")}`,
+        );
+    });
+}
+
+const layererSet = [
+    {
+        name: "Random",
+        alg: RANDOM_LAYERING,
+    },
+    {
+        name: "Greedy",
+        alg: GREEDY_LAYERING,
+    },
+    {
+        name: "VariantSearch",
+        alg: VARIANT_SEARCH_LAYERING,
+    },
+    {
+        name: "AdvancedVariantSearch",
+        alg: ADVANCED_VARIANT_SEARCH_LAYERING,
+    },
+];
+
+function main() {
+    const graphs = fs.readFileSync("./experiments/instances/graphs-bindings.csv").toString().split('\n').slice(1);
+    // const graphs = [
+    //     'ae125d76-d399-409d-bd5d-d2cc30942c25;0.6_0.6'
+    // ]
+    const worker = new Worker(path.resolve(__dirname, '../public/full.render.js'));
+    // fs.writeFileSync(
+    //     RESULT_FILE,
+    //     `name;graph-uuid;maxAngleArc;maxAngleLength;nLayers`,
+    // );
+
+    chainLayerers(layererSet, graphs, worker, 0).then(() => {
+        setTimeout(() => {
+            //@ts-ignore
+            worker.terminate();
+            process.exit();
+        }, 1000);
+    });
+}
+
+main();

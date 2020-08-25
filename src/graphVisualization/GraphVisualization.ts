@@ -8,13 +8,13 @@ import Graph, {
 } from '../graphRepresentation/Graph';
 import { Node } from '../graphRepresentation/types';
 
-import DrawingContext from './DrawingContext';
+import CanvasDrawingContext from './CanvasDrawingContext';
 import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
 import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
 import ElementRegistry from '../canvasIntercativity/ElementRegistry';
 
-const WIDTH = 30
-const HEIGHT = 30
+const WIDTH = 90
+const HEIGHT = 90
 
 export function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, edges: Array<StandarisedLayoutEdge>,
                           width: number, height: number): VizNode {
@@ -42,7 +42,7 @@ class GraphVizualization {
     graphLayout: GraphLayout;
     vizNodes: Array<VizNode>;
     vizEdges: Array<VizEdge>;
-    context: DrawingContext | null;
+    context: CanvasDrawingContext | null;
     elementRegistry: ElementRegistry;
 
     constructor(layoutClass: Constructable<GraphLayout>, 
@@ -83,7 +83,7 @@ class GraphVizualization {
     drawOnCanvas(canvas: HTMLCanvasElement, SCALE: number,
                  X: number, Y: number,
                  shiftX: number, shiftY: number): void {
-        this.context = new DrawingContext(canvas, SCALE, X, Y, shiftX, shiftY);
+        this.context = new CanvasDrawingContext(canvas, SCALE, X, Y, shiftX, shiftY);
     
         this.vizNodes.forEach(vizNode => {
             vizNode.draw(this.context!, this.elementRegistry!);
@@ -91,7 +91,9 @@ class GraphVizualization {
         
         this.vizEdges.forEach((viz_edge) => {
             this.context!.drawSegmentedArrow(viz_edge.points, {
-                lineWidth: .33,
+                lineWidth: .5,
+                arr_length: 10, 
+                arr_width: 8,
                 strokeStyle: 'black',
             });
         });
