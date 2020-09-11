@@ -29,16 +29,16 @@ function findPointSanityCheck(center: Point, line: Array<Point>, distance: numbe
     const further = normalizedLine.find(p => (p[0] * p[0] + p[1] * p[1]) > distance * distance);
 
     if (!further) {
-        console.error(new Error('No point will not be found (Point to far)'));
+        console.warn(new Error('No point will not be found (Point to far)'));
     }
 
     if (!closer) {
-        console.error(new Error('No point will not be found  (Point to close)'));
+        console.warn(new Error('No point will not be found  (Point to close)'));
     }
 }
 
 export function findPointOnLine(center: Point, line: Array<Point>, distance: number, reverse: boolean = false): Point {
-    // findPointSanityCheck(center, line, distance);
+    findPointSanityCheck(center, line, distance);
 
     let center_coords = line.map(point => ([point[0] - center[0], point[1] - center[1]]));
 

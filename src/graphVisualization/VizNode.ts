@@ -16,6 +16,7 @@ import {
 } from '../bindingLayeringAlgorithms/types';
 import ElementRegistry, { ElementType } from '../canvasIntercativity/ElementRegistry';
 import { Node } from '../graphRepresentation/types';
+import { NODE_WIDTH, NODE_HEIGHT, BINDING_FIRST_LAYER, BINDING_PER_LAYER, BINDING_SIZE, LINE_WIDTH } from './config';
 
 class VizNode {
     id: string;
@@ -26,15 +27,17 @@ class VizNode {
     anchors: Array<Anchor>;
     bindings: Array<Binding>;
     connections?: Array<Connection>;
+    config: { [key: string]: any; };
 
     constructor(id: string, node: Node, position:Point, outgoing_anchors: Array<Anchor>,
-                incoming_anchors: Array<Anchor>, width: number, height: number) {
+                incoming_anchors: Array<Anchor>, config: { [key: string]: any; }) {
         this.id = id;
         this.position = position;
-        this.width = width;
-        this.height = height;
+        this.width = config[NODE_WIDTH];
+        this.height = config[NODE_HEIGHT];
         this.node = node;
         this.bindings = [];
+        this.config = config;
 
         let anchors = [
             ...incoming_anchors.map(anch => ({ in: true, ...anch })),
@@ -73,21 +76,20 @@ class VizNode {
         });
         context.drawText(this.node.name, this.position, this.width);
 
-        console.log(this.connections, this.bindings)
         this.bindings.forEach((binding, idx) => this.drawBinding(binding, this.connections![idx], context, elementRegistry));
     }
 
     drawBinding(binding: Binding, conn: Connection, context: CanvasDrawingContext, elementRegistry: ElementRegistry) {
-        const distance = 60 + 8 * binding.layer_n;
+        const distance = this.config[BINDING_FIRST_LAYER] + this.config[BINDING_PER_LAYER] * binding.layer_n;
 
         const points = binding.sequence.map(anchor_idx => {
             const point = findPointOnLine(this.position, this.anchors[anchor_idx].points, distance, conn.in)
             
-            context.drawCircle(point, 4, {
+            context.drawCircle(point, this.config[BINDING_SIZE], {
                 fillStyle:  anchor_idx === 0 ? 'green' : 'black',
                 cfill: true,
             });
-            elementRegistry.registerElement(point, 4, {
+            elementRegistry.registerElement(point, this.config[BINDING_SIZE], {
                 type: ElementType.ANCHOR,
                 anchor: this.anchors[anchor_idx],
                 connection: conn, 
@@ -108,7 +110,7 @@ class VizNode {
 
         if (s_angle !== e_angle) {
             context.drawArc(this.position, distance, s_angle, e_angle, {
-                lineWidth: 1,
+                lineWidth: this.config[LINE_WIDTH],
                 stroke: true,
             });
         }

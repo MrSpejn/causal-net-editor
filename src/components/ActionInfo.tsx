@@ -9,6 +9,7 @@ interface Props {
     addingConnectionIn: boolean,
     removingConnection: boolean,
     removingNodes: boolean,
+    addingNodes: boolean,
 }
 
 interface State {
@@ -21,11 +22,11 @@ class ActionInfo extends React.Component<Props, State> {
             <div>
                 <p className="action-info__action-name">{incomming ? "To: " : "From: "}</p>
                 <p className="action-info__action-target">
-                    {this.props.connectionInProgress!.origin != null ? this.props.connectionInProgress!.origin : "__"}
+                    {this.props.connectionInProgress!.origin != null ? this.props.connectionInProgress!.origin.name : "__"}
                 </p>
                 <p className="action-info__action-name">{incomming ? " From: " : " To: "}</p>
                 <p className="action-info__action-target">
-                    [{this.props.connectionInProgress!.destination.join(", ")}]
+                    [{this.props.connectionInProgress!.destination.map(node => node.name).join(", ")}]
                 </p>
             </div>
         );

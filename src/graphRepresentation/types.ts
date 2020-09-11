@@ -7,7 +7,7 @@ export type Node = {
     incomming: Array<Array<number>>;
 }
 export type ConnectionInProgress = {
-    origin: number | null,
-    destination: Array<number>,
+    origin: Node | null,
+    destination: Array<Node>,
     in: boolean,
 }

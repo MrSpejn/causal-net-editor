@@ -1,29 +1,13 @@
-import { getRandomGraph, createReachabilityMatrix } from "./graphGeneration/utils";
-import _ from 'lodash';
-import { matrix, subset, index } from 'mathjs';
-const params =  {
-    widthNoNodes: 100,
-    widthGraphSaturation: 100,
-    expectedNoNodes: 12,
-    expectedGraphSaturation: .3,
-    maxNoNodes: 20,
-    edgeDistribution: number => _.range(number).map(() => 10),
-    bindingWeights: (bindingLen, params) => Math.pow(3, params.max - bindingLen + 1),
-    tierWeights: [1, 1, 1]
-};
+import fs from 'fs';
+import { matrix } from 'mathjs';
 
-_.range(1000).forEach(() => {
-    const [adjMatrix, names] = getRandomGraph(params);
+import { fixAdjMatrix } from "./graphGeneration/utils";
+import Graph from "../src/graphRepresentation/Graph";
 
-    const reach = createReachabilityMatrix(matrix(adjMatrix));
-    const reachableFromStart = _.flatten(
-            subset(reach, index(0, _.range(1, names.length))).toArray() as number[]
-        )
-    const endReachableFrom = _.flatten(
-            subset(reach, index(_.range(names.length - 1), names.length - 1)).toArray() as number[]
-        )
+const tiers = [[0], [1, 2], [3], [4, 5], [6], [7], [8], [9, 10], [11, 12], [13]];
 
-    if (!reachableFromStart.every(v => v === 1) || !endReachableFrom.every(v => v === 1)) {
-        throw 'Tantrum';
-    }
-});
+const graph = Graph.fromJSON(fs.readFileSync("./experiments/instances/0.1_12_v/graph-2c8567af-7bae-4eec-83f6-862c7dd2be12.json").toString());
+
+const mtx = matrix(graph.adj_matrix);
+fixAdjMatrix(mtx, tiers);
+console.log(mtx);

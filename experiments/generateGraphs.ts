@@ -17,6 +17,10 @@ function fractionOfAll(frac) {
     return targets => Math.floor(frac * sumCombinations(targets.length));
 }
 
+function fractionOfAllWithMax(frac, max) {
+    return targets => Math.max(Math.floor(frac * sumCombinations(targets.length)), max);
+}
+
 const generator = new GraphGenerator();
 const baseParams = {
     widthNoNodes: 100,
@@ -26,8 +30,8 @@ const baseParams = {
     edgeDistribution: number => _.range(number).map(() => 1),
     bindingWeights: (bindingLen, params) => comb(bindingLen, params.max),
     tierWeights: _.range(4).map(() => 1),
-    nBindLowerBound: fractionOfAll(.4),
-    nBindUpperBound: fractionOfAll(.401),
+    nBindLowerBound: fractionOfAllWithMax(.4, 6),
+    nBindUpperBound: fractionOfAllWithMax(.401, 6),
 };
 // 
 // nBindUpperBound
@@ -53,15 +57,6 @@ const baseParams = {
 //         expectedGraphSaturation: .1,
 //         tierWeights: _.range(2).map(() => 1),
 //     }],
-//     ['0.1_2_mostly_front', {
-//         ...baseParams,
-//         expectedGraphSaturation: .1,
-//         tierWeights: _.range(2).map(() => 1),
-//         edgeDistribution: number => [
-//             ..._.range(Math.ceil(number / 2)).map(() => 2),
-//             ..._.range(Math.floor(number / 2)).map(() => .5),
-//         ],
-//     }],
 //     ['0.2_12', {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
@@ -81,15 +76,6 @@ const baseParams = {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
 //         tierWeights: _.range(2).map(() => 1),
-//     }],
-//     ['0.2_2_mostly_front', {
-//         ...baseParams,
-//         expectedGraphSaturation: .2,
-//         tierWeights: _.range(2).map(() => 1),
-//         edgeDistribution: number => [
-//             ..._.range(Math.ceil(number / 2)).map(() => 2),
-//             ..._.range(Math.floor(number / 2)).map(() => .5),
-//         ],
 //     }],
 //     ['0.3_12', {
 //         ...baseParams,
@@ -111,15 +97,6 @@ const baseParams = {
 //         expectedGraphSaturation: .3,
 //         tierWeights: _.range(2).map(() => 1),
 //     }],
-//     ['0.3_2_mostly_front', {
-//         ...baseParams,
-//         expectedGraphSaturation: .3,
-//         tierWeights: _.range(2).map(() => 1),
-//         edgeDistribution: number => [
-//             ..._.range(Math.ceil(number / 2)).map(() => 2),
-//             ..._.range(Math.floor(number / 2)).map(() => .5),
-//         ],
-//     }],
 //     ['0.5_12', {
 //         ...baseParams,
 //         expectedGraphSaturation: .5,
@@ -140,15 +117,6 @@ const baseParams = {
 //         expectedGraphSaturation: .5,
 //         tierWeights: _.range(2).map(() => 1),
 //     }],
-//     ['0.5_2_mostly_front', {
-//         ...baseParams,
-//         expectedGraphSaturation: .5,
-//         tierWeights: _.range(2).map(() => 1),
-//         edgeDistribution: number => [
-//             ..._.range(Math.ceil(number / 2)).map(() => 2),
-//             ..._.range(Math.floor(number / 2)).map(() => .5),
-//         ],
-//     }],    
 // ]
 
 const groups = [
@@ -170,6 +138,12 @@ const groups = [
         nBindLowerBound: fractionOfAll(.6),
         nBindUpperBound: fractionOfAll(.601),
     }],
+    ['0.2_0.8', {
+        ...baseParams,
+        expectedGraphSaturation: .2,
+        nBindLowerBound: fractionOfAll(.8),
+        nBindUpperBound: fractionOfAll(.801),
+    }],
     ['0.4_0.2', {
         ...baseParams,
         expectedGraphSaturation: .4,
@@ -188,6 +162,12 @@ const groups = [
         nBindLowerBound: fractionOfAll(.6),
         nBindUpperBound: fractionOfAll(.601),
     }],
+    ['0.4_0.8', {
+        ...baseParams,
+        expectedGraphSaturation: .4,
+        nBindLowerBound: fractionOfAll(.8),
+        nBindUpperBound: fractionOfAll(.801),
+    }],
     ['0.6_0.2', {
         ...baseParams,
         expectedGraphSaturation: .6,
@@ -205,6 +185,12 @@ const groups = [
         expectedGraphSaturation: .6,
         nBindLowerBound: fractionOfAll(.6),
         nBindUpperBound: fractionOfAll(.601),
+    }],
+    ['0.6_0.8', {
+        ...baseParams,
+        expectedGraphSaturation: .6,
+        nBindLowerBound: fractionOfAll(.8),
+        nBindUpperBound: fractionOfAll(.801),
     }],
 ];
 

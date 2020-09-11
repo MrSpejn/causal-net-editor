@@ -27,6 +27,24 @@ class Graph {
         return new Graph(JSON.parse(json_string).nodes)
     }
 
+    static createGraph(node: string): Graph {
+        return new Graph([{
+            id: 0,
+            name: node,
+            outgoing:[],
+            incomming: [],
+        }]);
+    }
+
+    addNode(node: string): Graph {
+        return new Graph(this.nodes.concat([{
+            id: this.nodes.reduce((max, node) => Math.max(max, node.id), 0) + 1,
+            name: node,
+            outgoing:[],
+            incomming: [],
+        }]));
+    }
+
     removeNode(nodeId: number): Graph {
         const newNodes = this.nodes.filter(node => node.id !== nodeId);
         const withFilteredConn = newNodes.map(node => ({
@@ -65,11 +83,11 @@ class Graph {
 
     addConnection(connection: ConnectionInProgress): Graph {
         const fieldName = connection.in ? 'incomming' : 'outgoing';
-        const withFilteredConn = this.nodes.map(node => node.id === connection.origin ? ({
+        const withFilteredConn = this.nodes.map(node => node.id === connection.origin!.id ? ({
             ...node,
             [fieldName]: _.uniqWith([
                     ...node[fieldName],
-                    connection.destination
+                    connection.destination.map(node => node.id)
                 ].map(conn => conn.sort() || conn),
                 _.isEqual,
             ).filter(conn => conn.length),

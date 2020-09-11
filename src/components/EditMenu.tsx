@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { Button } from '@material-ui/core';
 import ArrowRight from '@material-ui/icons/SubdirectoryArrowRight';
 import SyncDisabled from '@material-ui/icons/SyncDisabled';
+import AddCircleOutline from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
 
 import InteractivityController from '../canvasIntercativity/InteractivityController';
@@ -10,6 +11,9 @@ import { NodeData, AnchorData } from '../canvasIntercativity/ElementRegistry';
 
 import ActionInfo from './ActionInfo';
 import { ConnectionInProgress } from '../graphRepresentation/types';
+import Graph from '../graphRepresentation/Graph';
+import ActionBox from './ActionBox';
+import InstructionModal from './InstructionsModal';
 
 interface Props {
     controller: InteractivityController | null,
@@ -20,18 +24,42 @@ interface State {
     connectionInProgress: ConnectionInProgress | null,
     addingConnectionOut: boolean,
     addingConnectionIn: boolean,
+    addingNodes: boolean,
     removingConnection: boolean,
     removingNodes: boolean,
+    isInstructionModalOpen: boolean,
 }
 
 const initialState = {
     connectionInProgress: null,
     addingConnectionIn: false,
     addingConnectionOut: false,
+    addingNodes: false,
     removingConnection: false,
     removingNodes: false,
+    isInstructionModalOpen: false,
 };
 
+function downloadObjectAsJson(exportObj: object, exportName = "graph"){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+function readFile(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.onload = e => resolve(e.target!.result as string);
+        reader.onerror = error => reject(error);
+        reader.onabort = abort => reject(abort);
+
+        reader.readAsText(file);
+    });
+}
 class EditMenu extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
@@ -53,41 +81,99 @@ class EditMenu extends React.Component<Props, State> {
         document.removeEventListener('keydown', this.handleKeyBoard);
     }
 
-    handleKeyBoard = (event: KeyboardEvent) => {
-        if (event.keyCode === 27) {
-            this.setState({
-                ...initialState,
-            });
-            event.preventDefault();
+    openInstructionModal = () => {
+        this.setState({
+            ...this.state,
+            isInstructionModalOpen: true,
+        });
+    }
 
-        } else if (event.keyCode === 13) {
-            this.addConnectionAndReset();
-            event.preventDefault();
+    closeInstructionModal = () => {
+        this.setState({
+            ...this.state,
+            isInstructionModalOpen: false,
+        });
+    }
+
+    loadGraph = (event: any) => {
+        readFile(event.target.files[0])
+            .then((graphString) => {
+                this.props.controller!.init(Graph.fromJSON(graphString));
+            })
+            .catch((error) => {
+                this.props.controller!.graph = undefined;
+                console.error(error);
+            });
+    }
+
+    saveGraph = () => {
+        if (this.props.controller && this.props.controller.graph) {
+            downloadObjectAsJson({nodes: this.props.controller!.graph!.nodes});
+        }
+    }
+    
+    handleKeyBoard = (event: KeyboardEvent) => {
+        if (this.props.controller) {
+            if (event.keyCode === 27) {
+                this.setState({
+                    ...initialState,
+                });
+                event.preventDefault();
+    
+            } else if (event.keyCode === 13) {
+                this.addConnectionAndReset();
+                event.preventDefault();
+            }
+        }
+       
+    }
+
+    addNode = (text: string) => {
+        let graph;
+        if (this.props.controller!.graph) {
+            graph = this.props.controller!.graph!.addNode(text);
+        } else {
+            graph = Graph.createGraph(text);
+        }
+
+        this.props.controller!.init(graph);
+    }
+
+    startAddingNode = () => {
+        if (this.props.controller) {
+            this.setState({ 
+                ...initialState,
+                addingNodes: true,
+            });
         }
     }
 
     startAddingConnectionIn = () => {
-        this.setState({ 
-            ...initialState,
-            addingConnectionIn: true,
-            connectionInProgress: {
-                in: true,
-                origin: null,
-                destination: [],
-            },
-        });
+        if (this.props.controller && this.props.controller.graph) {
+            this.setState({ 
+                ...initialState,
+                addingConnectionIn: true,
+                connectionInProgress: {
+                    in: true,
+                    origin: null,
+                    destination: [],
+                },
+            });
+        }
     }
 
     startAddingConnectionOut = () => {
-        this.setState({ 
-            ...initialState,
-            addingConnectionOut: true,
-            connectionInProgress: {
-                in: false,
-                origin: null,
-                destination: [],
-            },
-        });
+        if (this.props.controller && this.props.controller.graph) {
+            this.setState({ 
+                ...initialState,
+                addingConnectionOut: true,
+                connectionInProgress: {
+                    in: false,
+                    origin: null,
+                    destination: [],
+                },
+            });
+        }
     }
 
     startRemoveConnection = () => {
@@ -127,7 +213,7 @@ class EditMenu extends React.Component<Props, State> {
                         ...this.state.connectionInProgress,
                         destination: _.uniq([
                             ...this.state.connectionInProgress!.destination,
-                            parseInt(data.node.id),
+                            data.node.node,
                         ]).filter(node => node !== this.state.connectionInProgress!.origin),
                     }) as ConnectionInProgress
                 });
@@ -135,7 +221,7 @@ class EditMenu extends React.Component<Props, State> {
                 this.setState({
                     connectionInProgress: {
                         ...this.state.connectionInProgress!,
-                        origin: parseInt(data.node.id),
+                        origin: data.node.node,
                     }
                 });
             }
@@ -162,6 +248,12 @@ class EditMenu extends React.Component<Props, State> {
                         <Button
                             variant="outlined"
                             color="primary"
+                            startIcon={<AddCircleOutline />}
+                            onClick={this.startAddingNode}
+                        ></Button>
+                        <Button
+                            variant="outlined"
+                            color="primary"
                             startIcon={<ArrowRight />}
                             onClick={this.startAddingConnectionOut}
                         >1:N</Button>
@@ -185,20 +277,57 @@ class EditMenu extends React.Component<Props, State> {
                         ></Button>
                     </div>
                     <div className="menu__center-section">
-                        <Button
+                        {/* <Button
                             variant="contained"
                             color="primary"
                             onClick={this.props.switchMode}
-                        >Replay Log</Button>
-                        <Button color="primary">Instructions</Button>
+                            disabled
+                        >Replay Log</Button> */}
+                        <Button
+                            color="primary"
+                            onClick={this.openInstructionModal}
+                        >Instructions</Button>
 
                     </div>
                     <div className="menu__right-section">
-                        <Button variant="contained" color="secondary">Load Graph</Button>
-                        <Button variant="outlined" color="secondary">Save Graph</Button>
+                        <div>
+                            <input
+                                accept="application/json"
+                                id="upload-button"
+                                type="file"
+                                style={{display: 'none'}}
+                                onChange={this.loadGraph}
+                            />
+                            <label htmlFor="upload-button">
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    component="span"
+                                >
+                                    Load Graph
+                                </Button>
+                            </label>
+                        </div>
+                        <div style={{marginLeft: 10}}>
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={this.saveGraph}
+                            >
+                                Save Graph
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <ActionInfo {...this.state} />
+                <ActionBox
+                    onNodeAdd={this.addNode}
+                    addingNodes={this.state.addingNodes}
+                />
+                <InstructionModal
+                    isModalOpen={this.state.isInstructionModalOpen}
+                    closeModal={this.closeInstructionModal}
+                />
             </div>
         );
     }

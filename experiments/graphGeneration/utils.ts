@@ -135,7 +135,7 @@ export function fixAdjMatrix(adjMatrix: Matrix, nodeTiers: Array<Array<number>>)
         for (let origin of tier) {
             if (!reachMatrix.get([origin, end])) {
                 const potentialTargets = _.flatten(
-                    nodeTiers.slice(tierIdx).map(tier => _.shuffle(tier)),
+                    nodeTiers.slice(-1*(tierIdx+1)).map(tier => _.shuffle(tier)),
                 );
                 for (let target of potentialTargets) {
                     if (reachMatrix.get([target, end])) {
@@ -184,8 +184,14 @@ export function getRandomGraph(params: GenerationParams): [number[][], number[],
     const edges = generateEdgesForLoweringTiers(nodeTiers, edgeCounts);
 
     const adjMatrix = matrix(pairsToAdjMatrix(edges, allNodes));
-    fixAdjMatrix(adjMatrix, nodeTiers)
-
+    fixAdjMatrix(adjMatrix, nodeTiers);
+    const reach = (createReachabilityMatrix(adjMatrix).toArray() as number[][]);
+    if (!reach[0].slice(1).every(x => x === 1)) {
+        throw 'Not all are reachable from start';
+    }
+    if (!reach.map(r => r[r.length - 1]).slice(0, -1).every(x => x === 1)) {
+        throw 'Not all can reach end';
+    }
     return [
         adjMatrix.toArray() as number[][],
         allNodes,

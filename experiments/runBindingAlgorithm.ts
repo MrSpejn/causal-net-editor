@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import Worker from 'tiny-worker';
 import cliProgress from 'cli-progress';
-
 import {
     maxArcAbsoluteMetric,
     maxArcRadialMetric,
@@ -15,6 +14,7 @@ import { bindingAlgorithms, GREEDY_LAYERING, RANDOM_LAYERING, VARIANT_SEARCH_LAY
 import Graph, { INCOMMING, OUTGOING } from '../src/graphRepresentation/Graph';
 import { Node }  from '../src/graphRepresentation/types';
 import { constructViznode } from '../src/graphVisualization/GraphVisualization'; 
+import * as conf from '../src/graphVisualization/config';
 
 function mean(list) {
     return list.reduce((sum, x) => sum + x, 0) / list.length
@@ -38,6 +38,17 @@ function chainLayerers(layererSet, graphs, worker, idx) {
     });
 }
 
+const config =    {
+    [conf.NODE_HEIGHT]: 50,
+    [conf.NODE_WIDTH]: 50,
+    [conf.ARR_LENGTH]: 6,
+    [conf.ARR_WIDTH]: 8,
+    [conf.LINE_WIDTH]: 1,
+    [conf.BINDING_FIRST_LAYER]: 50,
+    [conf.BINDING_PER_LAYER]: 7,
+    [conf.BINDING_SIZE]: 4,
+};
+
 function chainGraphs(layerer, graphs, worker, idx, results, bar) {
     if (idx >= graphs.length) {
         return Promise.resolve(results);
@@ -51,6 +62,7 @@ function chainGraphs(layerer, graphs, worker, idx, results, bar) {
 
 function runLayerer(layerer, graph, worker) {
     const fields = graph.split(';')
+
     const graphPath = `./experiments/instances/${fields[1]}/graph-${fields[0]}.json`;
     const generatedGraph = Graph.fromJSON(fs.readFileSync(graphPath).toString());
     const LayoutAlg = new layouts[NEATO_LAYOUT]({
@@ -62,15 +74,23 @@ function runLayerer(layerer, graph, worker) {
         1920,
         1080,
     ).then((layout) => {
+        let hrTime = process.hrtime()
+        const start = hrTime[0] * 1000000 + hrTime[1] / 1000;
         const results = runLayeringAlgoritmForGraph(
             layout,
             generatedGraph.nodes,
             new bindingAlgorithms[layerer.alg](),
         );
+
+        hrTime = process.hrtime()
+        const end = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
         return {
             maxArcAbsolute: mean(results.map(x => x.maxArcAbsolute)),
             maxArcRadial: mean(results.map(x => x.maxArcRadial)),
             nLayers: mean(results.map(x => x.nLayers)),
+            time: end - start,
+
         };
     }).catch((err) => {
         console.error('Something went wrong')
@@ -78,12 +98,14 @@ function runLayerer(layerer, graph, worker) {
             maxArcAbsolute: null,
             maxArcRadial: null,
             nLayers: null,
+            time: null,
         }
     });
 }
 
 function runLayeringAlgoritmForGraph(graph: StandarisedLayout, nodes: Array<Node>, alg: BindingLayering) {
-    const vizNodes = graph.nodes.map((node, idx) => constructViznode(node, nodes[idx], graph.edges, 50, 50));
+
+    const vizNodes = graph.nodes.map((node, idx) => constructViznode(node, nodes[idx], graph.edges, conf));
     const results = [];
     for (let vizNode of vizNodes) {
         const connections = [
@@ -97,6 +119,7 @@ function runLayeringAlgoritmForGraph(graph: StandarisedLayout, nodes: Array<Node
             nLayers: nLayersMetric(vizNode.anchors, bindings, layers),
             maxArcAbsolute: maxArcAbsoluteMetric(vizNode.anchors, bindings, layers),
             maxArcRadial: maxArcRadialMetric(vizNode.anchors, bindings, layers),
+            
         });
     }
     return results
@@ -139,10 +162,10 @@ function main() {
     //     'ae125d76-d399-409d-bd5d-d2cc30942c25;0.6_0.6'
     // ]
     const worker = new Worker(path.resolve(__dirname, '../public/full.render.js'));
-    // fs.writeFileSync(
-    //     RESULT_FILE,
-    //     `name;graph-uuid;maxAngleArc;maxAngleLength;nLayers`,
-    // );
+    fs.writeFileSync(
+        RESULT_FILE,
+        `name;graph-uuid;maxAngleArc;maxAngleLength;nLayers;time`,
+    );
 
     chainLayerers(layererSet, graphs, worker, 0).then(() => {
         setTimeout(() => {

@@ -7,9 +7,10 @@ import { bindingAlgorithms } from '../bindingLayeringAlgorithms/';
 import GraphVisualization from '../graphVisualization/GraphVisualization';
 import { computeBoundingBox } from '../layoutAlgorithms/utils';
 import ElementRegistry, { ElementData, ElementType, AnchorData, NodeData } from './ElementRegistry';
-import { StandarisedLayout } from '../layoutAlgorithms/types';
+import { StandarisedLayout, GraphLayout } from '../layoutAlgorithms/types';
 
 import config from '../config.json'
+import { NODE_HEIGHT, ARR_LENGTH, ARR_WIDTH, BINDING_FIRST_LAYER, NODE_WIDTH, BINDING_SIZE, BINDING_PER_LAYER, LINE_WIDTH } from '../graphVisualization/config';
 
 function computeElementOnCanvas(event: MouseEvent, elementRegistry: ElementRegistry,
                                 scale: number, offsetX: number, offsetY: number): ElementData | undefined {
@@ -33,38 +34,51 @@ class InteractivityController extends EventEmitter {
     scale: number;
     offsetY: number = 0;
     offsetX: number = 0;
+    layout: GraphLayout;
     
     constructor(canvas: HTMLCanvasElement, scale: number = 0, scrollTop: number = -1, scrollLeft: number = -1) {
         super();
         
         this.scale = scale;
+        const worker = new Worker('./full.render.js');
+
+        this.layout = new layouts[config.layout]({
+            worker,
+        }, {});
 
         this.canvas = canvas;
         canvas.parentElement?.addEventListener('wheel', event => {
-            event.preventDefault();
-            event.stopPropagation();
-            this.scale += event.deltaY * -0.01 * Math.pow(this.scale, 1/4);
-            this.scale = Math.min(Math.max(.125, this.scale), 12);
-            this.renderGraphOnScreen(this.graph!);
-        });
-        canvas.addEventListener('click', event => {
-            const el = computeElementOnCanvas(event, this.elementRegistry!,
-                                              this.scale, this.offsetX, this.offsetY);
-            if (el) {
-                if (el.type === ElementType.NODE) {
-                    this.emit(this.onNodeClick, el as NodeData);
-                } else if (el.type === ElementType.ANCHOR) {
-                    this.emit(this.onAnchorClick, el as AnchorData);
-                }
+            if (this.graph != null) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.scale += event.deltaY * -0.01 * Math.pow(this.scale, 1/4);
+                this.scale = Math.min(Math.max(.125, this.scale), 12);
+                this.renderGraphOnScreen(this.graph!);
             }
         });
+        canvas.addEventListener('click', event => {
+            if (this.graph != null) {
+                const el = computeElementOnCanvas(event, this.elementRegistry!,
+                    this.scale, this.offsetX, this.offsetY);
+                if (el) {
+                    if (el.type === ElementType.NODE) {
+                        this.emit(this.onNodeClick, el as NodeData);
+                    } else if (el.type === ElementType.ANCHOR) {
+                        this.emit(this.onAnchorClick, el as AnchorData);
+                    }
+                }
+            }
+    
+        });
         canvas.addEventListener('mousemove', event => {
-            const el = computeElementOnCanvas(event, this.elementRegistry!,
-                                              this.scale, this.offsetX, this.offsetY);
-            if (el) {
-                this.canvas!.style.cursor = 'pointer';
-            } else {
-                this.canvas!.style.cursor = 'default';
+            if (this.graph != null) {
+                const el = computeElementOnCanvas(event, this.elementRegistry!,
+                                                this.scale, this.offsetX, this.offsetY);
+                if (el) {
+                    this.canvas!.style.cursor = 'pointer';
+                } else {
+                    this.canvas!.style.cursor = 'default';
+                }
             }
         });
 
@@ -77,9 +91,19 @@ class InteractivityController extends EventEmitter {
     init(graph: Graph): void {
         this.elementRegistry = new ElementRegistry();
         this.visualization = new GraphVisualization(
-            layouts[config.layout],
+            this.layout,
             bindingAlgorithms[config.bindingAlgorithm],
             this.elementRegistry,
+            {
+                [NODE_HEIGHT]: 50,
+                [NODE_WIDTH]: 50,
+                [ARR_LENGTH]: 6,
+                [ARR_WIDTH]: 8,
+                [LINE_WIDTH]: 1,
+                [BINDING_FIRST_LAYER]: 50,
+                [BINDING_PER_LAYER]: 7,
+                [BINDING_SIZE]: 4,
+            }
         );
         this.visualization!.computeGraphicalRepresentation(graph).then((layout) => {
             const boundingBox = computeBoundingBox(layout, 1);
@@ -87,8 +111,10 @@ class InteractivityController extends EventEmitter {
             const minHeight = this.canvas!.parentElement!.clientHeight;
             
             if (this.scale === 0) {
-                this.scale = Math.min(minWidth / boundingBox.width, minHeight / boundingBox.height);
+                const scale = Math.min(minWidth / boundingBox.width, minHeight / boundingBox.height);
+                this.scale = Math.min(Math.max(.125, scale), 12);
             }
+            console.log('Scale', this.scale)
             this.renderGraphOnScreen(graph).then(() => {
                 this.graph = graph;
                 this.emit(this.onInit);

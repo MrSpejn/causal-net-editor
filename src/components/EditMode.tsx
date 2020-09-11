@@ -2,8 +2,6 @@ import React from 'react';
 import InteractivityController from '../canvasIntercativity/InteractivityController';
 import EditMenu from './EditMenu';
 import { CrossModeData } from './types';
-import Graph from '../graphRepresentation/Graph';
-import JSONGraph from '../graphs/graphSepsis';
 import dragscroll from 'dragscroll';
 
 interface Props {
@@ -27,14 +25,16 @@ class EditMode extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        const graph = this.props.crossModeData.graph ? this.props.crossModeData.graph : Graph.fromJSON(JSON.stringify(JSONGraph));
+        const graph = this.props.crossModeData.graph ? this.props.crossModeData.graph : null;
        
         const canvas = document.querySelector('canvas')!;
         const disp = this.props.crossModeData.canvasDisplay;
         const controller = new InteractivityController(canvas, disp.scale, disp.scrollTop, disp.scrollLeft);
 
-        controller.init(graph);
-        
+        if (graph != null) {
+            controller.init(graph);
+        }
+      
         this.setState({
             controller,
         });

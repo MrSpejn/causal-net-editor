@@ -12,12 +12,13 @@ import CanvasDrawingContext from './CanvasDrawingContext';
 import { StandarisedLayoutNode, StandarisedLayoutEdge, GraphLayout, StandarisedLayout } from '../layoutAlgorithms/types';
 import { Constructable, BindingLayering } from '../bindingLayeringAlgorithms/types';
 import ElementRegistry from '../canvasIntercativity/ElementRegistry';
+import { LINE_WIDTH, ARR_LENGTH, ARR_WIDTH } from './config';
 
-const WIDTH = 90
-const HEIGHT = 90
+const WIDTH = 30
+const HEIGHT = 30
 
 export function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, edges: Array<StandarisedLayoutEdge>,
-                          width: number, height: number): VizNode {
+                          config: { [key: string]: any; }): VizNode {
     return new VizNode(
         layoutNode.id,
         node,
@@ -32,8 +33,7 @@ export function constructViznode(layoutNode: StandarisedLayoutNode, node: Node, 
             'points': edge.points,
             'point': edge.points[edge.points.length - 1],
         })),
-        width,
-        height,
+        config,
     )
 }
 
@@ -44,17 +44,20 @@ class GraphVizualization {
     vizEdges: Array<VizEdge>;
     context: CanvasDrawingContext | null;
     elementRegistry: ElementRegistry;
+    config: { [key: string]: any; };
 
-    constructor(layoutClass: Constructable<GraphLayout>, 
+    constructor(layout: GraphLayout, 
                 bindingClass: Constructable<BindingLayering>, 
                 elementRegistry: ElementRegistry,
+                config:{ [key: string]: any; },
                 ) {
-        this.graphLayout = new layoutClass();
+        this.graphLayout = layout;
         this.bindingClass = bindingClass;
         this.vizNodes = [];
         this.vizEdges = [];
         this.context = null;
         this.elementRegistry = elementRegistry;
+        this.config = config;
     }
 
     computeGraphicalRepresentation(graph: Graph): Promise<StandarisedLayout> {
@@ -65,7 +68,7 @@ class GraphVizualization {
             HEIGHT,
         ).then((output: StandarisedLayout) => {
             this.vizNodes = output.nodes.map((layoutNode: StandarisedLayoutNode, idx: number) => 
-                constructViznode(layoutNode, graph.nodes[idx], output.edges, WIDTH, HEIGHT));
+                constructViznode(layoutNode, graph.nodes[idx], output.edges, this.config));
             this.vizEdges = output.edges.map((edge: StandarisedLayoutEdge) => 
                 new VizEdge(edge.start_id, edge.end_id, edge.points));
 
@@ -91,9 +94,9 @@ class GraphVizualization {
         
         this.vizEdges.forEach((viz_edge) => {
             this.context!.drawSegmentedArrow(viz_edge.points, {
-                lineWidth: .5,
-                arr_length: 10, 
-                arr_width: 8,
+                lineWidth: this.config[LINE_WIDTH],
+                arr_length: this.config[ARR_LENGTH], 
+                arr_width: this.config[ARR_WIDTH],
                 strokeStyle: 'black',
             });
         });
