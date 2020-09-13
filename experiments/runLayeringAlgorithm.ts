@@ -79,82 +79,85 @@ function saveResults(results, graphs, layout) {
 }
 
 const saveName = './experiments/results/layout-results.csv';
-// const layoutSet = [
-
-//     {
-//         name: "layer-default",
-//         layout: DOT_LAYOUT,
-//         splines: "\"polyline\"",
-//     },
-  
-//     {
-//         name: "force-default",
-//         layout: NEATO_LAYOUT,
-//     },
-// ];
-
 const layoutSet = [
-    // {
-    //     name: "layer-1",
-    //     layout: DOT_LAYOUT,
-    //     splines: "false",	
-    // },
-    // {
-    //     name: "layer-2",
-    //     layout: DOT_LAYOUT,
-    //     splines: "\"polyline\"",
-    // },
     {
-        name: "force-1",
-        layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.0001,
-            model: "\"shortpath\"",
-        }
+        name: "layer-default",
+        layout: DOT_LAYOUT,
+        splines: "\"polyline\"",
     },
+  
     {
-        name: "force-2",
+        name: "force-default",
         layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.0005,
-            model: "\"shortpath\"",
-
-        }
-    },
-    {
-        name: "force-3",
-        layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.00001,
-            model: "\"shortpath\"",
-
-        }
-    },
-    {
-        name: "force-4",
-        layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.0001,
-            model: "\"subset\"",
-        }
-    },
-    {
-        name: "force-5",
-        layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.0005,
-            model: "\"subset\"",
-        }
-    },
-    {
-        name: "force-6",
-        layout: NEATO_LAYOUT,
-        params: {
-            epsilon: 0.00001,
-            model: "\"subset\"",
-        }
+            params: {
+                epsilon: 0.0001,
+                model: "\"shortpath\"",
+            }
     },
 ];
+
+// const layoutSet = [
+//     // {
+//     //     name: "layer-1",
+//     //     layout: DOT_LAYOUT,
+//     //     splines: "false",	
+//     // },
+//     // {
+//     //     name: "layer-2",
+//     //     layout: DOT_LAYOUT,
+//     //     splines: "\"polyline\"",
+//     // },
+//     {
+//         name: "force-1",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.0001,
+//             model: "\"shortpath\"",
+//         }
+//     },
+//     {
+//         name: "force-2",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.001,
+//             model: "\"shortpath\"",
+
+//         }
+//     },
+//     {
+//         name: "force-3",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.00001,
+//             model: "\"shortpath\"",
+
+//         }
+//     },
+//     {
+//         name: "force-4",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.0001,
+//             model: "\"subset\"",
+//         }
+//     },
+//     {
+//         name: "force-5",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.001,
+//             model: "\"subset\"",
+//         }
+//     },
+//     {
+//         name: "force-6",
+//         layout: NEATO_LAYOUT,
+//         params: {
+//             epsilon: 0.00001,
+//             model: "\"subset\"",
+//         }
+//     },
+// ];
 
 function main() {
     const graphs = fs.readFileSync("./experiments/instances/graphs-layouts.csv").toString().split('\n').slice(1);

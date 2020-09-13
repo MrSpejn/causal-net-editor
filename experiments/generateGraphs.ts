@@ -36,165 +36,97 @@ const baseParams = {
 // 
 // nBindUpperBound
 
+const saturations = [.2, .4, .6, .8]
+const tiers = [12, 6, 2]
+const groups = []
+
+saturations.forEach(sat => {
+    tiers.forEach(ntier => {
+        groups.push([`${sat}_${ntier}`, {
+            ...baseParams,
+            expectedGraphSaturation: sat,
+            tierWeights: _.range(ntier).map(() => 1),
+
+        }])
+    });
+});
+
 // const groups = [
-//     ['0.1_12', {
-//         ...baseParams,
-//         expectedGraphSaturation: .1,
-//         tierWeights: _.range(12).map(() => 1),
-//     }],
-//     ['0.1_8', {
-//         ...baseParams,
-//         expectedGraphSaturation: .1,
-//         tierWeights: _.range(8).map(() => 1),
-//     }],
-//     ['0.1_4', {
-//         ...baseParams,
-//         expectedGraphSaturation: .1,
-//         tierWeights: _.range(4).map(() => 1),
-//     }],
-//     ['0.1_2', {
-//         ...baseParams,
-//         expectedGraphSaturation: .1,
-//         tierWeights: _.range(2).map(() => 1),
-//     }],
-//     ['0.2_12', {
+//     ['0.2_0.2', {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
-//         tierWeights: _.range(12).map(() => 1),
+//         nBindLowerBound: fractionOfAll(.2),
+//         nBindUpperBound: fractionOfAll(.201),
 //     }],
-//     ['0.2_8', {
+//     ['0.2_0.4', {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
-//         tierWeights: _.range(8).map(() => 1),
+//         nBindLowerBound: fractionOfAll(.4),
+//         nBindUpperBound: fractionOfAll(.401),
 //     }],
-//     ['0.2_4', {
+//     ['0.2_0.6', {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
-//         tierWeights: _.range(4).map(() => 1),
+//         nBindLowerBound: fractionOfAll(.6),
+//         nBindUpperBound: fractionOfAll(.601),
 //     }],
-//     ['0.2_2', {
+//     ['0.2_0.8', {
 //         ...baseParams,
 //         expectedGraphSaturation: .2,
-//         tierWeights: _.range(2).map(() => 1),
+//         nBindLowerBound: fractionOfAll(.8),
+//         nBindUpperBound: fractionOfAll(.801),
 //     }],
-//     ['0.3_12', {
+//     ['0.4_0.2', {
 //         ...baseParams,
-//         expectedGraphSaturation: .3,
-//         tierWeights: _.range(12).map(() => 1),
+//         expectedGraphSaturation: .4,
+//         nBindLowerBound: fractionOfAll(.2),
+//         nBindUpperBound: fractionOfAll(.201),
 //     }],
-//     ['0.3_8', {
+//     ['0.4_0.4', {
 //         ...baseParams,
-//         expectedGraphSaturation: .3,
-//         tierWeights: _.range(8).map(() => 1),
+//         expectedGraphSaturation: .4,
+//         nBindLowerBound: fractionOfAll(.4),
+//         nBindUpperBound: fractionOfAll(.401),
 //     }],
-//     ['0.3_4', {
+//     ['0.4_0.6', {
 //         ...baseParams,
-//         expectedGraphSaturation: .3,
-//         tierWeights: _.range(4).map(() => 1),
+//         expectedGraphSaturation: .4,
+//         nBindLowerBound: fractionOfAll(.6),
+//         nBindUpperBound: fractionOfAll(.601),
 //     }],
-//     ['0.3_2', {
+//     ['0.4_0.8', {
 //         ...baseParams,
-//         expectedGraphSaturation: .3,
-//         tierWeights: _.range(2).map(() => 1),
+//         expectedGraphSaturation: .4,
+//         nBindLowerBound: fractionOfAll(.8),
+//         nBindUpperBound: fractionOfAll(.801),
 //     }],
-//     ['0.5_12', {
+//     ['0.6_0.2', {
 //         ...baseParams,
-//         expectedGraphSaturation: .5,
-//         tierWeights: _.range(12).map(() => 1),
+//         expectedGraphSaturation: .6,
+//         nBindLowerBound: fractionOfAll(.2),
+//         nBindUpperBound: fractionOfAll(.201),
 //     }],
-//     ['0.5_8', {
+//     ['0.6_0.4', {
 //         ...baseParams,
-//         expectedGraphSaturation: .5,
-//         tierWeights: _.range(8).map(() => 1),
+//         expectedGraphSaturation: .6,
+//         nBindLowerBound: fractionOfAll(.4),
+//         nBindUpperBound: fractionOfAll(.401),
 //     }],
-//     ['0.5_4', {
+//     ['0.6_0.6', {
 //         ...baseParams,
-//         expectedGraphSaturation: .5,
-//         tierWeights: _.range(4).map(() => 1),
+//         expectedGraphSaturation: .6,
+//         nBindLowerBound: fractionOfAll(.6),
+//         nBindUpperBound: fractionOfAll(.601),
 //     }],
-//     ['0.5_2', {
+//     ['0.6_0.8', {
 //         ...baseParams,
-//         expectedGraphSaturation: .5,
-//         tierWeights: _.range(2).map(() => 1),
+//         expectedGraphSaturation: .6,
+//         nBindLowerBound: fractionOfAll(.8),
+//         nBindUpperBound: fractionOfAll(.801),
 //     }],
-// ]
+// ];
 
-const groups = [
-    ['0.2_0.2', {
-        ...baseParams,
-        expectedGraphSaturation: .2,
-        nBindLowerBound: fractionOfAll(.2),
-        nBindUpperBound: fractionOfAll(.201),
-    }],
-    ['0.2_0.4', {
-        ...baseParams,
-        expectedGraphSaturation: .2,
-        nBindLowerBound: fractionOfAll(.4),
-        nBindUpperBound: fractionOfAll(.401),
-    }],
-    ['0.2_0.6', {
-        ...baseParams,
-        expectedGraphSaturation: .2,
-        nBindLowerBound: fractionOfAll(.6),
-        nBindUpperBound: fractionOfAll(.601),
-    }],
-    ['0.2_0.8', {
-        ...baseParams,
-        expectedGraphSaturation: .2,
-        nBindLowerBound: fractionOfAll(.8),
-        nBindUpperBound: fractionOfAll(.801),
-    }],
-    ['0.4_0.2', {
-        ...baseParams,
-        expectedGraphSaturation: .4,
-        nBindLowerBound: fractionOfAll(.2),
-        nBindUpperBound: fractionOfAll(.201),
-    }],
-    ['0.4_0.4', {
-        ...baseParams,
-        expectedGraphSaturation: .4,
-        nBindLowerBound: fractionOfAll(.4),
-        nBindUpperBound: fractionOfAll(.401),
-    }],
-    ['0.4_0.6', {
-        ...baseParams,
-        expectedGraphSaturation: .4,
-        nBindLowerBound: fractionOfAll(.6),
-        nBindUpperBound: fractionOfAll(.601),
-    }],
-    ['0.4_0.8', {
-        ...baseParams,
-        expectedGraphSaturation: .4,
-        nBindLowerBound: fractionOfAll(.8),
-        nBindUpperBound: fractionOfAll(.801),
-    }],
-    ['0.6_0.2', {
-        ...baseParams,
-        expectedGraphSaturation: .6,
-        nBindLowerBound: fractionOfAll(.2),
-        nBindUpperBound: fractionOfAll(.201),
-    }],
-    ['0.6_0.4', {
-        ...baseParams,
-        expectedGraphSaturation: .6,
-        nBindLowerBound: fractionOfAll(.4),
-        nBindUpperBound: fractionOfAll(.401),
-    }],
-    ['0.6_0.6', {
-        ...baseParams,
-        expectedGraphSaturation: .6,
-        nBindLowerBound: fractionOfAll(.6),
-        nBindUpperBound: fractionOfAll(.601),
-    }],
-    ['0.6_0.8', {
-        ...baseParams,
-        expectedGraphSaturation: .6,
-        nBindLowerBound: fractionOfAll(.8),
-        nBindUpperBound: fractionOfAll(.801),
-    }],
-];
-
-const CSV_PATH = './experiments/instances/graphs-bindings.csv';
+const CSV_PATH = './experiments/instances/graphs-layouts.csv';
 
 fs.writeFileSync(CSV_PATH, "uuid;set;generation_params;nodes;adj_matrix;bindings;details");
 groups.forEach((data) => {
