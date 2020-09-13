@@ -25,7 +25,8 @@
     "tiny-worker": "^2.3.0",
     "typed-event-emitter": "^2.0.0",
     "typescript": "^3.9.5",
-    "victor": "^1.1.0"
+    "victor": "^1.1.0",
+    "viz.js": "^2.1.2"
   },
   "scripts": {
     "start": "react-scripts start",
